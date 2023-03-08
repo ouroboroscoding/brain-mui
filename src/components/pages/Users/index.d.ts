@@ -9,9 +9,10 @@
 /// <reference types="react" />
 import PropTypes from 'prop-types';
 import { SectionStruct } from './Permissions';
+import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
     allowedPermissions: SectionStruct;
-    onError?: (error: any) => void;
+    onError?: (error: responseErrorStruct) => void;
     onSuccess?: (type: string, data?: any) => void;
 };
 /**

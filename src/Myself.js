@@ -7,6 +7,8 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-03-06
  */
+// Ouroboros modules
+import body from '@ouroboros/body';
 import brain from '@ouroboros/brain';
 import clone from '@ouroboros/clone';
 // NPM modules
@@ -27,6 +29,12 @@ let _permissions = {};
 const _permissionsSubscriptions = [];
 // Rights
 const _rightsSubscriptions = {};
+// Trap no session errors
+body.onNoSession(() => {
+    brain.session(null);
+    set(false);
+    permissionsSet({});
+});
 /**
  * Permissions Subscribe
  *
@@ -42,9 +50,13 @@ export function permissionsSubscribe(callback, permission) {
     if (permission === undefined) {
         // Just add it to the list
         _permissionsSubscriptions.push(callback);
+        // Clone the current permissions
+        const oPermissions = clone(_permissions);
+        // Call the callback with the current data
+        callback(oPermissions);
         // Return the current data and an unsubscribe function
         return {
-            data: clone(_permissions),
+            data: oPermissions,
             unsubscribe: () => {
                 permissionsUnsubscribe(callback);
             }
@@ -58,9 +70,13 @@ export function permissionsSubscribe(callback, permission) {
         }
         // Add the callback
         _rightsSubscriptions[permission].push(callback);
+        // Get the rights
+        const oRights = permission in _permissions ? clone(_permissions[permission]) : {};
+        // Call the callback with the current data
+        callback(oRights);
         // Return the current data and an unsubscribe function
         return {
-            data: permission in _permissions ? clone(_permissions[permission]) : {},
+            data: oRights,
             unsubscribe: () => {
                 permissionsUnsubscribe(callback, permission);
             }
@@ -231,6 +247,7 @@ export function signout() {
         // Call the sign out request
         brain.create('signout').then((data) => {
             if (data) {
+                brain.session(null);
                 set(false);
                 permissionsSet({});
             }
@@ -250,9 +267,13 @@ export function signout() {
 export function subscribe(callback) {
     // Add it to the list
     _userSubscriptions.push(callback);
+    // Clone the user
+    const oUser = clone(_user);
+    // Call the callback with the current data
+    callback(oUser);
     // Return the current data and an unsubscribe function
     return {
-        data: clone(_user),
+        data: oUser,
         unsubscribe: () => {
             unsubscribe(callback);
         }
@@ -323,16 +344,12 @@ export function update() {
  * @access public
  * @returns the rights associated with all permissions
  */
-export function usePermissions(permission) {
+export function usePermissions() {
     // Store the state
     const [perms, permsSet] = useState({});
-    // Load effect
+    // Load effect, subscribe to permissions changes
     useEffect(() => {
-        // Subscribe to permission changes
-        const o = permissionsSubscribe((data) => {
-            permsSet(data);
-        });
-        // Unsubscribe
+        const o = permissionsSubscribe(permsSet);
         return () => o.unsubscribe();
     }, []);
     // Return the current value
@@ -351,13 +368,9 @@ export function usePermissions(permission) {
 export function useRights(permission) {
     // Store the state
     const [rights, rightsSet] = useState({});
-    // Load effect
+    // Load effect, subscribe to specific permission changes
     useEffect(() => {
-        // Subscribe to permission changes
-        const o = permissionsSubscribe((data) => {
-            rightsSet(data);
-        }, permission);
-        // Unsubscribe
+        const o = permissionsSubscribe(rightsSet, permission);
         return () => o.unsubscribe();
     }, []);
     // Return the current value
@@ -375,7 +388,7 @@ export function useRights(permission) {
 export function useUser() {
     // State
     const [user, userSet] = useState(false);
-    // Load effect
+    // Load effect, subscribe to user changes
     useEffect(() => {
         const o = subscribe(userSet);
         return () => o.unsubscribe();

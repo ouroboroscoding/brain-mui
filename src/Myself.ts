@@ -9,7 +9,7 @@
  */
 
 // Ouroboros modules
-import { responseErrorStruct } from '@ouroboros/body';
+import body, { responseErrorStruct } from '@ouroboros/body';
 import brain from '@ouroboros/brain';
 import clone from '@ouroboros/clone';
 
@@ -67,6 +67,13 @@ const _permissionsSubscriptions: permissionsCallback[] = [];
 // Rights
 const _rightsSubscriptions: Record<string, rightsCallback[]> = {};
 
+// Trap no session errors
+body.onNoSession(() => {
+	brain.session(null as unknown as string);
+	set(false);
+	permissionsSet({});
+});
+
 /**
  * Permissions Subscribe
  *
@@ -85,9 +92,15 @@ export function permissionsSubscribe(callback: permissionsCallback | rightsCallb
 		// Just add it to the list
 		_permissionsSubscriptions.push(callback as permissionsCallback);
 
+		// Clone the current permissions
+		const oPermissions = clone(_permissions);
+
+		// Call the callback with the current data
+		callback(oPermissions)
+
 		// Return the current data and an unsubscribe function
 		return {
-			data: clone(_permissions),
+			data: oPermissions,
 			unsubscribe: () => {
 				permissionsUnsubscribe(callback);
 			}
@@ -104,9 +117,15 @@ export function permissionsSubscribe(callback: permissionsCallback | rightsCallb
 		// Add the callback
 		_rightsSubscriptions[permission].push(callback as rightsCallback);
 
+		// Get the rights
+		const oRights = permission in _permissions ? clone(_permissions[permission]) : {};
+
+		// Call the callback with the current data
+		callback(oRights);
+
 		// Return the current data and an unsubscribe function
 		return {
-			data: permission in _permissions ? clone(_permissions[permission]) : {},
+			data: oRights,
 			unsubscribe: () => {
 				permissionsUnsubscribe(callback, permission);
 			}
@@ -320,6 +339,7 @@ export function signout(): Promise<boolean> {
 		// Call the sign out request
 		brain.create('signout').then((data: boolean) => {
 			if(data) {
+				brain.session(null as unknown as string);
 				set(false);
 				permissionsSet({});
 			}
@@ -342,9 +362,15 @@ export function subscribe(callback: userCallback): subscribeReturn {
 	// Add it to the list
 	_userSubscriptions.push(callback);
 
+	// Clone the user
+	const oUser = clone(_user);
+
+	// Call the callback with the current data
+	callback(oUser);
+
 	// Return the current data and an unsubscribe function
 	return {
-		data: clone(_user),
+		data: oUser,
 		unsubscribe: () => {
 			unsubscribe(callback);
 		}
@@ -428,20 +454,14 @@ export function update(): Promise<userType> {
  * @access public
  * @returns the rights associated with all permissions
  */
-export function usePermissions(permission: string): Record<string, rightsStruct> {
+export function usePermissions(): Record<string, rightsStruct> {
 
 	// Store the state
 	const [perms, permsSet] = useState<Record<string, rightsStruct>>({});
 
-	// Load effect
+	// Load effect, subscribe to permissions changes
 	useEffect(() => {
-
-		// Subscribe to permission changes
-		const o = permissionsSubscribe((data: Record<string, rightsStruct>) => {
-			permsSet(data);
-		});
-
-		// Unsubscribe
+		const o = permissionsSubscribe(permsSet);
 		return () => o.unsubscribe();
 	}, []);
 
@@ -464,15 +484,9 @@ export function useRights(permission: string): rightsStruct {
 	// Store the state
 	const [rights, rightsSet] = useState<rightsStruct>({});
 
-	// Load effect
+	// Load effect, subscribe to specific permission changes
 	useEffect(() => {
-
-		// Subscribe to permission changes
-		const o = permissionsSubscribe((data: rightsStruct) => {
-			rightsSet(data);
-		}, permission);
-
-		// Unsubscribe
+		const o = permissionsSubscribe(rightsSet, permission);
 		return () => o.unsubscribe();
 	}, []);
 
@@ -494,7 +508,7 @@ export function useUser() {
 	// State
 	const [user, userSet] = useState<userType | false>(false);
 
-	// Load effect
+	// Load effect, subscribe to user changes
 	useEffect(() => {
 		const o = subscribe(userSet);
 		return () => o.unsubscribe();

@@ -28,7 +28,7 @@ import Permission from './Permission';
 // Types
 export type PermissionsProps = {
 	onClose: () => void,
-	onUpdate?: (message: string) => void,
+	onUpdate?: () => void,
 	sections: SectionStruct[],
 	value: Record<string, number>
 }
@@ -66,7 +66,7 @@ export default function Permissions(props: PermissionsProps) {
 	// Load effect
 	useEffect(() => {
 		brain.read('permissions', {
-			_id: props.value._id
+			user: props.value._id
 		}).then(permissionsSet);
 	}, [props.value]);
 
@@ -100,15 +100,14 @@ export default function Permissions(props: PermissionsProps) {
 
 		// Update the permissions
 		brain.update('permissions', {
-			_id: props.value._id,
+			user: props.value._id,
 			rights: (permissions as PermissionsRecord).rights
 		}).then((data: boolean) => {
 			if(data) {
 				if(props.onUpdate) {
-					props.onUpdate('Permissions');
-				} else {
-					props.onClose();
+					props.onUpdate();
 				}
+				props.onClose();
 			}
 		});
 	}
@@ -149,7 +148,7 @@ export default function Permissions(props: PermissionsProps) {
 // Force props
 Permissions.propTypes = {
 	onClose: PropTypes.func.isRequired,
-	onUpdated: PropTypes.func,
+	onUpdate: PropTypes.func,
 	sections: PropTypes.arrayOf(PropTypes.exact({
 		title: PropTypes.string.isRequired,
 		rights: PropTypes.arrayOf(PropTypes.exact({

@@ -36,7 +36,7 @@ export default function Permissions(props) {
     // Load effect
     useEffect(() => {
         brain.read('permissions', {
-            _id: props.value._id
+            user: props.value._id
         }).then(permissionsSet);
     }, [props.value]);
     // Called when any permission is changed
@@ -62,16 +62,14 @@ export default function Permissions(props) {
     function update() {
         // Update the permissions
         brain.update('permissions', {
-            _id: props.value._id,
+            user: props.value._id,
             rights: permissions.rights
         }).then((data) => {
             if (data) {
                 if (props.onUpdate) {
-                    props.onUpdate('Permissions');
+                    props.onUpdate();
                 }
-                else {
-                    props.onClose();
-                }
+                props.onClose();
             }
         });
     }
@@ -93,7 +91,7 @@ export default function Permissions(props) {
 // Force props
 Permissions.propTypes = {
     onClose: PropTypes.func.isRequired,
-    onUpdated: PropTypes.func,
+    onUpdate: PropTypes.func,
     sections: PropTypes.arrayOf(PropTypes.exact({
         title: PropTypes.string.isRequired,
         rights: PropTypes.arrayOf(PropTypes.exact({

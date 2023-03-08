@@ -260,6 +260,11 @@ export default function Account(props: AccountProps) {
 		})
 	}
 
+	// Wait until we get the user
+	if(!user) {
+		return null;
+	}
+
 	// Render
 	return (
 		<Dialog

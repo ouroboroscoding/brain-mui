@@ -28,7 +28,7 @@ export type AccountProps = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function Account(props: AccountProps): JSX.Element;
+declare function Account(props: AccountProps): JSX.Element | null;
 declare namespace Account {
     var propTypes: {
         onClose: PropTypes.Validator<(...args: any[]) => any>;

@@ -121,7 +121,7 @@ export declare function update(): Promise<userType>;
  * @access public
  * @returns the rights associated with all permissions
  */
-export declare function usePermissions(permission: string): Record<string, rightsStruct>;
+export declare function usePermissions(): Record<string, rightsStruct>;
 /**
  * Use Rights
  *

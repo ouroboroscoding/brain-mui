@@ -161,7 +161,7 @@ export default function Users(props) {
         // Create a new Promise and return it
         return new Promise((resolve, reject) => {
             // Fetch the records from the server
-            brain.read('search', filter).then((data) => {
+            brain.read('search', { filter }).then((data) => {
                 // Set the new records
                 recordsSet(data);
                 // Resolve
@@ -223,7 +223,19 @@ export default function Users(props) {
     const lActions = [];
     // If the user can change permissions
     if (rightsPermission.update) {
-        lActions.push({ tooltip: "Edit User's permissions", icon: 'fa-solid fa-list', component: Permissions, props: props.allowedPermissions });
+        lActions.push({
+            tooltip: "Edit User's permissions",
+            icon: 'fa-solid fa-list',
+            component: Permissions,
+            props: {
+                sections: props.allowedPermissions,
+                onUpdate: () => {
+                    if (props.onSuccess) {
+                        props.onSuccess('permissions');
+                    }
+                }
+            }
+        });
     }
     // If the user can update other users
     if (rightsUser.update) {

@@ -203,6 +203,10 @@ export default function Account(props) {
             });
         });
     }
+    // Wait until we get the user
+    if (!user) {
+        return null;
+    }
     // Render
     return (React.createElement(Dialog, { maxWidth: "lg", onClose: props.onClose, open: true, "aria-labelledby": "account-dialog-title" },
         React.createElement(DialogTitle, { id: "account-dialog-title" }, "Account Details"),

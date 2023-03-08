@@ -11,7 +11,7 @@
 import PropTypes from 'prop-types';
 export type PermissionsProps = {
     onClose: () => void;
-    onUpdate?: (message: string) => void;
+    onUpdate?: () => void;
     sections: SectionStruct[];
     value: Record<string, number>;
 };
@@ -44,7 +44,7 @@ declare function Permissions(props: PermissionsProps): JSX.Element;
 declare namespace Permissions {
     var propTypes: {
         onClose: PropTypes.Validator<(...args: any[]) => any>;
-        onUpdated: PropTypes.Requireable<(...args: any[]) => any>;
+        onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
         sections: PropTypes.Validator<(Required<PropTypes.InferProps<{
             title: PropTypes.Validator<string>;
             rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{

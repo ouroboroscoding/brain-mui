@@ -1,12 +1,13 @@
 {
 	"name": "@ouroboros/brain-mui",
 	"version": "1.0.0",
-	"description": "Components for use with Brain service",
+	"description": "Components for use with the Brain service",
 	"main": "src/index.js",
 	"types": "src/index.d.ts",
 	"scripts": {
 		"build": "tslint -p tsconfig.json && tsc",
 		"clean": "cd src; find . -type f -name \"*.js\" -delete; find . -type f -name \"*.d.ts\" -delete",
+		"for_local": "npm install; tslint -p tsconfig.json && tsc; rm -Rf node_modules",
 		"test": "echo \"Error: no test specified.\" && exit 1"
 	},
 	"repository": {
@@ -33,16 +34,17 @@
 		"typescript": "^4.8.3"
 	},
 	"dependencies": {
-		"@ouroboros/body": "file:../body",
-		"@ouroboros/brain": "file:../brain",
-		"@ouroboros/clone": "^1.0.1"
+		"@ouroboros/brain": "^1.0.0",
+		"@ouroboros/clone": "^1.0.1",
+		"@ouroboros/define": "^1.0.2",
+		"@ouroboros/define-mui": "file:../define-mui",
+		"@ouroboros/tools": "^0.4.1"
 	},
 	"peerDependencies": {
 		"@emotion/react": "^11.8.2",
 		"@emotion/styled": "^11.8.1",
+		"@ouroboros/body": "^1.0.0",
 		"@mui/material": "^5.5.1",
-		"@ouroboros/define": "^1.0.2",
-		"@ouroboros/define-mui": "file:../define-mui",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	}

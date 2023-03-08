@@ -44,7 +44,7 @@ import { SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
 	allowedPermissions: SectionStruct,
-	onError?: (error: any) => void,
+	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: (type: string, data?: any) => void
 }
 
@@ -200,7 +200,7 @@ export default function Users(props: UsersProps) {
 		return new Promise((resolve, reject) => {
 
 			// Fetch the records from the server
-			brain.read('search', filter).then((data: any[]) => {
+			brain.read('search', { filter }).then((data: any[]) => {
 
 				// Set the new records
 				recordsSet(data);
@@ -275,7 +275,19 @@ export default function Users(props: UsersProps) {
 
 	// If the user can change permissions
 	if(rightsPermission.update) {
-		lActions.push({tooltip: "Edit User's permissions", icon: 'fa-solid fa-list', component: Permissions as unknown as React.FunctionComponent<{ onClose: () => void; value: Record<string, any>; }>, props: props.allowedPermissions });
+		lActions.push({
+			tooltip: "Edit User's permissions",
+			icon: 'fa-solid fa-list',
+			component: Permissions as unknown as React.FunctionComponent<{ onClose: () => void; value: Record<string, any>; }>,
+			props: {
+				sections: props.allowedPermissions,
+				onUpdate: () => {
+					if(props.onSuccess) {
+						props.onSuccess('permissions');
+					}
+				}
+			}
+		});
 	}
 
 	// If the user can update other users
