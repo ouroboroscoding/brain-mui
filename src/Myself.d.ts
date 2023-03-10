@@ -7,6 +7,7 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-03-06
  */
+import { rightsStruct } from './';
 export type permissionsCallback = (permissions: Record<string, rightsStruct>) => void;
 export type permissionSubscribeReturn = {
     data: Record<string, rightsStruct> | rightsStruct;
@@ -14,12 +15,6 @@ export type permissionSubscribeReturn = {
 };
 export type rightOption = 'create' | 'delete' | 'read' | 'update';
 export type rightsCallback = (rights: rightsStruct) => void;
-export type rightsStruct = {
-    create?: true;
-    delete?: true;
-    read?: true;
-    update?: true;
-};
 export type signinStruct = {
     email: string;
     passwd: string;

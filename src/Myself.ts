@@ -17,6 +17,7 @@ import clone from '@ouroboros/clone';
 import { useEffect, useState } from 'react';
 
 // Types
+import { rightsStruct } from './';
 export type permissionsCallback = (permissions: Record<string, rightsStruct>) => void;
 export type permissionSubscribeReturn = {
 	data: Record<string, rightsStruct> | rightsStruct;
@@ -24,12 +25,6 @@ export type permissionSubscribeReturn = {
 }
 export type rightOption = 'create' | 'delete' | 'read' | 'update';
 export type rightsCallback = (rights: rightsStruct) => void;
-export type rightsStruct = {
-	create?: true,
-	delete?: true,
-	read?: true,
-	update?: true
-}
 export type signinStruct = {
 	email: string,
 	passwd: string

@@ -37,14 +37,15 @@
 		"@ouroboros/brain": "^1.0.0",
 		"@ouroboros/clone": "^1.0.1",
 		"@ouroboros/define": "^1.0.2",
-		"@ouroboros/define-mui": "file:../define-mui",
-		"@ouroboros/tools": "^0.4.1"
+		"@ouroboros/define-mui": "^1.0.3",
+		"@ouroboros/tools": "^0.4.1",
+		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
 		"@emotion/react": "^11.8.2",
 		"@emotion/styled": "^11.8.1",
-		"@ouroboros/body": "^1.0.0",
 		"@mui/material": "^5.5.1",
+		"@ouroboros/body": "^1.0.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	}

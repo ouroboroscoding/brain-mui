@@ -18,3 +18,9 @@ export declare const RIGHTS: {
     DELETE: number;
     ALL: number;
 };
+export type rightsStruct = {
+    create?: true;
+    delete?: true;
+    read?: true;
+    update?: true;
+};

@@ -25,3 +25,11 @@ export const RIGHTS = {
 	DELETE: 8,
 	ALL: 15
 };
+
+// Rights by permission
+export type rightsStruct = {
+	create?: true,
+	delete?: true,
+	read?: true,
+	update?: true
+}
