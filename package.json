@@ -1,6 +1,6 @@
 {
 	"name": "@ouroboros/brain-mui",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Components for use with the Brain service",
 	"main": "src/index.js",
 	"types": "src/index.d.ts",
