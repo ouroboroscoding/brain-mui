@@ -10,7 +10,6 @@
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
 import UserDef from '@ouroboros/brain/definitions/user.json';
-import clone from '@ouroboros/clone';
 import { Parent } from '@ouroboros/define';
 import { DefineParent, errorTree } from '@ouroboros/define-mui';
 import { combine } from '@ouroboros/tools';
@@ -44,7 +43,11 @@ const PasswdParent = new Parent({
 				title: 'Confirm Password', type: 'password' }
 	}
 });
-const UserParent = new Parent(clone(UserDef));
+const UserParent = new Parent(UserDef, {
+	__ui__: {
+		update: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
+	}
+});
 
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
@@ -192,7 +195,14 @@ export default function Setup(props: SetupProps) {
 					/>
 					<br />
 					<DefineParent
-						gridSizes={{__default__: {xs: 12}}}
+						gridSizes={{
+							title: {xs: 12, md: 4},
+							first_name: {xs: 12, md: 8},
+							last_name: {xs: 12, md: 8},
+							suffix: {xs: 12, md: 4},
+							phone_number: {xs: 12, md: 8},
+							phone_ext: {xs: 12, md: 4}
+						}}
 						label="placeholder"
 						ref={refUpdate}
 						name="user"
