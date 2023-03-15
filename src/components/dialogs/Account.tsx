@@ -110,6 +110,9 @@ export default function Account(props: AccountProps) {
 		// Create a new Promise and return it
 		return new Promise((resolve, reject) => {
 
+			// Add the URL to self
+			self.url = props.verificationUrl;
+
 			// Send the data to the server
 			brain.update('user/email', self).then((data: boolean) => {
 
