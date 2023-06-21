@@ -34,6 +34,16 @@ export type userType = {
     [x: string]: any;
 };
 /**
+ * On No Session
+ *
+ * Sets the callback called if any request fails the session
+ *
+ * @name onNoSession
+ * @access public
+ * @param callback The function to call if there are session errors
+ */
+export declare function onNoSession(callback: () => void): void;
+/**
  * Permissions Subscribe
  *
  * Subscribes a callback to all permissions or a specific one

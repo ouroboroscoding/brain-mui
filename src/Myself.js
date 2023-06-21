@@ -29,12 +29,34 @@ let _permissions = {};
 const _permissionsSubscriptions = [];
 // Rights
 const _rightsSubscriptions = {};
+// Callbacks
+let _noSession;
 // Trap no session errors
 body.onNoSession(() => {
     brain.session(null);
     set(false);
     permissionsSet({});
+    if (_noSession !== undefined) {
+        _noSession();
+    }
 });
+/**
+ * On No Session
+ *
+ * Sets the callback called if any request fails the session
+ *
+ * @name onNoSession
+ * @access public
+ * @param callback The function to call if there are session errors
+ */
+export function onNoSession(callback) {
+    // Make sure the callback is function
+    if (typeof callback !== 'function') {
+        throw new Error('onNoSession() called with an invalid callback');
+    }
+    // Set the callback
+    _noSession = callback;
+}
 /**
  * Permissions Subscribe
  *
