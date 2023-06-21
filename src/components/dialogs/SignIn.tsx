@@ -69,23 +69,22 @@ export default function SignIn(props: SignInProps) {
 			return;
 		}
 
+		// Clear errors
+		fieldErrorsSet({});
+
 		// Send the forgot password request
 		brain.create('user/passwd/forgot', {
 			email: emailRef.current.value,
 			url: props.forgotUrl
 		}).then((data: boolean) => {
 
-			// If we got success
-			if(data) {
-
-				// If we have an onForgot prop
-				if(props.onForgot) {
-					props.onForgot();
-				}
-
-				// Clear forgot
-				forgotSet(false);
+			// If we have an onForgot prop
+			if(props.onForgot) {
+				props.onForgot();
 			}
+
+			// Clear forgot
+			forgotSet(false);
 
 		}, (error: responseErrorStruct) => {
 
@@ -125,6 +124,9 @@ export default function SignIn(props: SignInProps) {
 			passwdRef.current.value === '') {
 			return;
 		}
+
+		// Clear errors
+		fieldErrorsSet({});
 
 		// Call the signin
 		signin({

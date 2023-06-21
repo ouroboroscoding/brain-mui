@@ -28,19 +28,34 @@ const PasswdParent = new Parent({
     passwd: {
         __type__: 'string',
         __maximum__: 255,
-        __ui__: { regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
-            title: 'Set Password', type: 'password' }
+        __ui__: {
+            __errors__: {
+                'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+            },
+            __regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+            __title__: 'Set Password',
+            __type__: 'password'
+        }
     },
     confirm_passwd: {
         __type__: 'string',
         __maximum__: 255,
-        __ui__: { regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
-            title: 'Confirm Password', type: 'password' }
+        __ui__: {
+            __errors__: {
+                'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+            },
+            __regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+            __title__: 'Confirm Password',
+            __type__: 'password'
+        }
     }
 });
 const UserParent = new Parent(UserDef, {
     __ui__: {
-        update: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
+        __update__: [
+            'title', 'first_name', 'last_name', 'suffix', 'phone_number',
+            'phone_ext'
+        ]
     }
 });
 /**
@@ -101,6 +116,7 @@ export default function Setup(props) {
             });
             return false;
         }
+        // If the passwords do not match
         if (oPasswd.passwd !== oPasswd.confirm_passwd) {
             refPasswd.current.error({
                 confirm_passwd: 'Passwords don\'t match'

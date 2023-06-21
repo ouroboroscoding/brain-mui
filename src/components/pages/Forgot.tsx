@@ -9,10 +9,12 @@
 
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
+import { Parent } from '@ouroboros/define';
+import { DefineParent, errorTree } from '@ouroboros/define-mui';
 
 // NPM modules
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 // Material UI
 import Box from '@mui/material/Box';
@@ -21,7 +23,35 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Dialog from '@mui/material/Dialog';
-import TextField from '@mui/material/TextField';
+
+// Create the Parent
+const PasswdParent = new Parent({
+	__name__: 'PSUEDO_Brain_Passwd_Change',
+	passwd: {
+		__type__: 'string',
+		__maximum__: 255,
+		__ui__: {
+			__errors__: {
+				'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+			},
+			__regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+			__title__: 'Password',
+			__type__: 'password'
+		}
+	},
+	confirm_passwd: {
+		__type__: 'string',
+		__maximum__: 255,
+		__ui__: {
+			__errors__: {
+				'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+			},
+			__regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+			__title__: 'Confirm Password',
+			__type__: 'password'
+		}
+	}
+});
 
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
@@ -44,9 +74,10 @@ export type ForgotProps = {
 export default function Forgot(props: ForgotProps) {
 
 	// State
-	const [confirm, confirmSet] = useState('');
 	const [errorMsg, errorMsgSet] = useState<string | false>(false);
-	const [passwd, passwdSet] = useState('');
+
+	// Refs
+	const refPasswd = useRef<DefineParent>(null);
 
 	// Trap enter clicks to trigger sign in
 	function keyPressed(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -58,19 +89,37 @@ export default function Forgot(props: ForgotProps) {
 	// Called to change password
 	function submit() {
 
+		// If we have no password ref
+		if(refPasswd.current === null) {
+			return;
+		}
+
 		// Reset error message
 		errorMsgSet(false);
 
+		// Fetch the values from the password Parent
+		const oPasswd = refPasswd.current.value;
+
+		// If the password is empty
+		if(!oPasswd.passwd || oPasswd.passwd.trim() === '') {
+			refPasswd.current.error({
+				passwd: 'Please create a password'
+			});
+			return false;
+		}
+
 		// If the passwords do not match
-		if(confirm !== passwd) {
-			errorMsgSet('Passwords do not match');
-			return;
+		if(oPasswd.passwd !== oPasswd.confirm_passwd) {
+			refPasswd.current.error({
+				confirm_passwd: 'Passwords don\'t match'
+			});
+			return false;
 		}
 
 		// Make the request to the server
 		brain.update('user/passwd/forgot', {
 			key: props.forgotKey,
-			passwd
+			passwd: oPasswd.passwd
 		}).then((data: boolean) => {
 			if(data) {
 				if(props.onSuccess) {
@@ -79,9 +128,11 @@ export default function Forgot(props: ForgotProps) {
 			}
 		}, (error: responseErrorStruct) => {
 			if(error.code === errors.body.DB_NO_RECORD) {
-				errorMsgSet('Invalid Key');
+				errorMsgSet('Invalid Key. Please make sure you copied the URL from your email correctly.');
 			} else if(error.code === errors.PASSWORD_STRENGTH) {
-				errorMsgSet('New password is not strong enough. Must contain at least 1 uppercase letter, at least 1 lowercase letter, and at least 1 number.');
+				refPasswd.current?.error({
+					passwd: 'failed regex (custom)'
+				});
 			} else {
 				errorMsgSet(JSON.stringify(error, null, 4));
 			}
@@ -100,33 +151,20 @@ export default function Forgot(props: ForgotProps) {
 			<DialogTitle id="signin-dialog-title">Please change your password</DialogTitle>
 			<DialogContent dividers>
 				{errorMsg &&
-					<div className="error">{errorMsg}</div>
+					<Box className="error">{errorMsg}</Box>
 				}
 				<br />
-				<Box className="field">
-					<TextField
-						label="Password"
-						onChange={ev => passwdSet(ev.target.value)}
-						onKeyPress={keyPressed}
-						placeholder="Password"
-						type="password"
-						value={passwd}
-					/>
-				</Box>
-				<Box className="field">
-					<TextField
-						label="Confirm Password"
-						onChange={ev => confirmSet(ev.target.value)}
-						onKeyPress={keyPressed}
-						placeholder="Confirm Password"
-						type="password"
-						value={confirm}
-					/>
-				</Box>
+				<DefineParent
+					gridSizes={{__default__: {xs: 12}}}
+					label="placeholder"
+					name="passwd"
+					ref={refPasswd}
+					node={PasswdParent}
+					type="create"
+				/>
 			</DialogContent>
 			<DialogActions className="flexColumns">
 				<Button
-					disabled={passwd.trim() === '' || confirm.trim() === ''}
 					onClick={submit}
 					variant="contained"
 				>

@@ -31,45 +31,62 @@ import { useUser, update } from '../../Myself';
 // Generate the E-Mail change tree Trees
 const EmailTree = new Tree({
 	__name__: 'PSUEDO_Brain_Email',
+
 	email: {
 		__type__: 'string',
-		__ui__: { 'title': 'New E-Mail', 'type': 'text' }
+		__ui__: { __title__: 'New E-Mail', __type__: 'text' }
 	},
 
 	email_passwd: {
 		__type__: 'string',
 		__maximum__: 255,
-		__ui__: { 'title': 'Your Password', 'type': 'password' }
+		__ui__: { __title__: 'Your Password', __type__: 'password' }
 	}
 });
 
 // Generate the Password change Tree
 const PassTree = new Tree({
 	__name__: 'PSUEDO_Brain_Passwd_Change',
+
 	passwd: {
 		__type__: 'string',
-		__ui__: { title: 'Current Password', type: 'password' }
+		__ui__: { __title__: 'Current Password', __type__: 'password' }
 	},
 
 	new_passwd: {
 		__type__: 'string',
 		__maximum__: 255,
-		__ui__: { regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
-				title: 'New Password', type: 'password' }
+		__ui__: {
+			__errors__: {
+				'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+			},
+			__regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+			__title__: 'New Password',
+			__type__: 'password'
+		}
 	},
 
 	confirm_passwd: {
 		__type__: 'string',
 		__maximum__: 255,
-		__ui__: { regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
-				title: 'Confirm Password', type: 'password' }
+		__ui__: {
+			__errors__: {
+				'failed regex (custom)': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be a minimum of 8 characters.'
+			},
+			__regex__: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})',
+			__title__: 'Confirm Password',
+			__type__: 'password'
+		}
 	}
 });
 
 // Generate the User details Tree
 const UserTree = new Tree(UserDef, {
 	__ui__: {
-		update: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
+		__update__: [
+			'title', 'first_name', 'last_name', 'suffix', 'phone_number',
+			'phone_ext'
+		]
 	}
 });
 

@@ -61,13 +61,38 @@ let _permissions: Record<string, rightsStruct> = {};
 const _permissionsSubscriptions: permissionsCallback[] = [];
 // Rights
 const _rightsSubscriptions: Record<string, rightsCallback[]> = {};
+// Callbacks
+let _noSession: () => void;
 
 // Trap no session errors
 body.onNoSession(() => {
 	brain.session(null as unknown as string);
 	set(false);
 	permissionsSet({});
+	if(_noSession !== undefined) {
+		_noSession();
+	}
 });
+
+/**
+ * On No Session
+ *
+ * Sets the callback called if any request fails the session
+ *
+ * @name onNoSession
+ * @access public
+ * @param callback The function to call if there are session errors
+ */
+export function onNoSession(callback: () => void): void {
+
+	// Make sure the callback is function
+	if(typeof callback !== 'function') {
+		throw new Error('onNoSession() called with an invalid callback');
+	}
+
+	// Set the callback
+	_noSession = callback;
+}
 
 /**
  * Permissions Subscribe

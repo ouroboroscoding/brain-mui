@@ -50,20 +50,19 @@ export default function SignIn(props) {
         if (emailRef.current === null) {
             return;
         }
+        // Clear errors
+        fieldErrorsSet({});
         // Send the forgot password request
         brain.create('user/passwd/forgot', {
             email: emailRef.current.value,
             url: props.forgotUrl
         }).then((data) => {
-            // If we got success
-            if (data) {
-                // If we have an onForgot prop
-                if (props.onForgot) {
-                    props.onForgot();
-                }
-                // Clear forgot
-                forgotSet(false);
+            // If we have an onForgot prop
+            if (props.onForgot) {
+                props.onForgot();
             }
+            // Clear forgot
+            forgotSet(false);
         }, (error) => {
             // If we got field errors
             if (error.code === bodyErrors.DATA_FIELDS) {
@@ -97,6 +96,8 @@ export default function SignIn(props) {
             passwdRef.current.value === '') {
             return;
         }
+        // Clear errors
+        fieldErrorsSet({});
         // Call the signin
         signin({
             email: emailRef.current.value,
