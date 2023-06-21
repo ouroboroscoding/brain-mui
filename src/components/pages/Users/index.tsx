@@ -51,13 +51,13 @@ export type UsersProps = {
 // Generate the user Tree
 const UserTree = new Tree(UserDef, {
 	__ui__: {
-		create: ['email', 'title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext'],
-		results: ['_id', 'email', 'title', 'first_name', 'last_name', 'suffix'],
-		search: ['_id', 'email', 'first_name', 'last_name', 'phone_number'],
-		update: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
+		__create__: ['email', 'title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext'],
+		__results__: ['_id', 'email', 'title', 'first_name', 'last_name', 'suffix'],
+		__search__: ['_id', 'email', 'first_name', 'last_name', 'phone_number'],
+		__update__: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
 	},
-	title: { __ui__: { title: 'Dr. Mrs. Miss...'}},
-	suffix: { __ui__: { title: 'PhD, RN, Esq...'}}
+	title: { __ui__: { __title__: 'Dr. Mrs. Miss...'}},
+	suffix: { __ui__: { __title__: 'PhD, RN, Esq...'}}
 });
 
 // Constants
