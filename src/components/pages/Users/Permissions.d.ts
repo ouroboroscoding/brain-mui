@@ -12,19 +12,26 @@ import PropTypes from 'prop-types';
 export type PermissionsProps = {
     onClose: () => void;
     onUpdate?: () => void;
+    portals: portalStruct[];
     sections: SectionStruct[];
     value: Record<string, number>;
 };
 export type PermissionsRecord = {
-    _user: string;
     _created?: number;
     _updated?: number;
+    user: string;
+    portal: string;
+    title: string;
     rights: Record<string, number>;
 };
 export type PermissionStruct = {
     name: string;
     title: string;
     allowed: number;
+};
+export type portalStruct = {
+    key: string | null;
+    title: string;
 };
 export type SectionStruct = {
     title: string;
@@ -45,6 +52,10 @@ declare namespace Permissions {
     var propTypes: {
         onClose: PropTypes.Validator<(...args: any[]) => any>;
         onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        portals: PropTypes.Requireable<(Required<PropTypes.InferProps<{
+            key: PropTypes.Requireable<string>;
+            title: PropTypes.Validator<string>;
+        }>> | null | undefined)[]>;
         sections: PropTypes.Validator<(Required<PropTypes.InferProps<{
             title: PropTypes.Validator<string>;
             rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{
@@ -56,6 +67,12 @@ declare namespace Permissions {
         value: PropTypes.Requireable<PropTypes.InferProps<{
             _id: PropTypes.Validator<string>;
         }>>;
+    };
+    var defaultProps: {
+        portals: {
+            key: null;
+            title: string;
+        }[];
     };
 }
 export default Permissions;
