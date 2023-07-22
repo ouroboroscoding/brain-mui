@@ -23,7 +23,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
 // Local components
 import Permission from './Permission';
 /**
@@ -38,7 +37,7 @@ import Permission from './Permission';
  */
 export default function Permissions(props) {
     // State
-    const [permissions, permissionsSet] = useState(false);
+    const [permissions, permissionsSet] = useState([]);
     const [tab, tabSet] = useState(0);
     const [portalMenu, portalMenuSet] = useState(false);
     const [remaining, remainingSet] = useState([]);
@@ -56,10 +55,6 @@ export default function Permissions(props) {
     }, [props.value]);
     // Remaining effect
     useEffect(() => {
-        // If we have no permissions, do nothing
-        if (permissions === false) {
-            return;
-        }
         // Copy the possible portals
         const lPortals = clone(props.portals);
         // Go through each passed permission
@@ -75,16 +70,16 @@ export default function Permissions(props) {
         // Clone the current values
         const dPermissions = clone(permissions);
         // If we don't have the name yet
-        if (!dPermissions.rights[name]) {
-            dPermissions.rights[name] = 0;
+        if (!dPermissions[tab].rights[name]) {
+            dPermissions[tab].rights[name] = 0;
         }
         // Set the rights
         if (val) {
-            dPermissions.rights[name] = val;
+            dPermissions[tab].rights[name] = val;
         }
         // Else, remove the permission
         else {
-            delete dPermissions.rights[name];
+            delete dPermissions[tab].rights[name];
         }
         // Update the state
         permissionsSet(dPermissions);
@@ -92,7 +87,7 @@ export default function Permissions(props) {
     // Called to add a portal to the permissions
     function portalAdd(portal) {
         // Add the portal to the data
-        permissionsSet(val => {
+        permissionsSet((val) => {
             const lPerms = clone(val);
             lPerms.push({
                 portal: portal.key,
@@ -102,9 +97,11 @@ export default function Permissions(props) {
             return lPerms;
         });
         // Remove the portal from the remaining
-        remainingSet(val => {
+        remainingSet((val) => {
             return arrayFindDelete(val, 'key', portal.key, true);
         });
+        // Set the new tab
+        tabSet(remaining.length);
     }
     // Called to display the menu to add a location to the order
     function portalAddMenu(ev) {
@@ -122,6 +119,7 @@ export default function Permissions(props) {
         // Update the permissions
         brain.update('permissions', {
             user: props.value._id,
+            portal: permissions[tab].portal,
             rights: permissions[tab].rights
         }).then((data) => {
             if (data) {
@@ -131,10 +129,6 @@ export default function Permissions(props) {
                 props.onClose();
             }
         });
-    }
-    // If we don't have permissions yet
-    if (permissions === false) {
-        return React.createElement(Typography, null, "Loading...");
     }
     // Render
     return (React.createElement(React.Fragment, null,
@@ -147,7 +141,7 @@ export default function Permissions(props) {
             remaining.length > 0 &&
                 React.createElement(Tab, { icon: React.createElement("i", { className: "fa-solid fa-plus" }), onClick: portalAddMenu })),
         portalMenu !== false &&
-            React.createElement(Menu, { anchorEl: portalMenu.element, open: true, onClose: ev => portalMenuSet(false) }, portalMenu.items.map(o => React.createElement(MenuItem, { key: o.key, onClick: ev => {
+            React.createElement(Menu, { anchorEl: portalMenu.element, open: true, onClose: () => portalMenuSet(false) }, portalMenu.items.map(o => React.createElement(MenuItem, { key: o.key, onClick: () => {
                     portalMenuSet(false);
                     portalAdd(o);
                 } }, o.title))),
@@ -171,7 +165,7 @@ Permissions.propTypes = {
     portals: PropTypes.arrayOf(PropTypes.exact({
         key: PropTypes.string,
         title: PropTypes.string.isRequired
-    })),
+    })).isRequired,
     sections: PropTypes.arrayOf(PropTypes.exact({
         title: PropTypes.string.isRequired,
         rights: PropTypes.arrayOf(PropTypes.exact({
@@ -183,8 +177,4 @@ Permissions.propTypes = {
     value: PropTypes.shape({
         _id: PropTypes.string.isRequired
     })
-};
-// Default props
-Permissions.defaultProps = {
-    portals: [{ key: null, title: 'Admin' }]
 };
