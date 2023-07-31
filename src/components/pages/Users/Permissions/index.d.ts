@@ -7,8 +7,8 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-03-06
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 export type PermissionsProps = {
     ids?: Record<string, string>;
     onClose: () => void;
@@ -48,7 +48,7 @@ export type SectionStruct = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function Permissions(props: PermissionsProps): JSX.Element;
+declare function Permissions(props: PermissionsProps): React.JSX.Element;
 declare namespace Permissions {
     var propTypes: {
         ids: PropTypes.Requireable<{

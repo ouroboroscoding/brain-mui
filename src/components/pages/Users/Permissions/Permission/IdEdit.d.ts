@@ -7,8 +7,8 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-07-30
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 export type IdEditProps = {
     allowed: number;
     ident: string;
@@ -27,7 +27,7 @@ export type IdEditProps = {
  * @param props Properties passed to the component
  * @returns React.Component
  */
-declare function IdEdit(props: IdEditProps): JSX.Element;
+declare function IdEdit(props: IdEditProps): React.JSX.Element;
 declare namespace IdEdit {
     var propTypes: {
         allowed: PropTypes.Validator<number>;

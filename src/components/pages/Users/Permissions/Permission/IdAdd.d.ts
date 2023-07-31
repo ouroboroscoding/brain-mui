@@ -7,8 +7,8 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-07-30
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 export type IdAddProps = {
     allowed: number;
     labels: Record<string, string>;
@@ -24,7 +24,7 @@ export type IdAddProps = {
  * @param props Properties passed to the component
  * @returns React.Component
  */
-declare function IdAdd(props: IdAddProps): JSX.Element;
+declare function IdAdd(props: IdAddProps): React.JSX.Element;
 declare namespace IdAdd {
     var propTypes: {
         allowed: PropTypes.Validator<number>;

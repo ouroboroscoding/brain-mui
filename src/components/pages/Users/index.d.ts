@@ -6,8 +6,8 @@
  * @author Chris Nasr <chris@ouroboroscoding.com>
  * @created 2023-01-18
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 import { PortalStruct, SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
@@ -26,7 +26,7 @@ export type UsersProps = {
  * @param props Properties passed to the component
  * @returns React.Component
  */
-declare function Users(props: UsersProps): JSX.Element;
+declare function Users(props: UsersProps): React.JSX.Element;
 declare namespace Users {
     var propTypes: {
         allowedPermissions: PropTypes.Validator<(Required<PropTypes.InferProps<{

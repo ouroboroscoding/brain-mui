@@ -7,8 +7,8 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-03-06
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 export type PermissionProps = {
     allowed: number;
     labels: Record<string, string>;
@@ -27,7 +27,7 @@ export type PermissionProps = {
  * @param props Properties passed to the component
  * @returns React.Component
  */
-declare function Permission(props: PermissionProps): JSX.Element;
+declare function Permission(props: PermissionProps): React.JSX.Element;
 declare namespace Permission {
     var propTypes: {
         allowed: PropTypes.Validator<number>;
