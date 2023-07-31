@@ -6,10 +6,10 @@
  * @author Chris Nasr <chris@ouroboroscoding.com>
  * @created 2023-01-17
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 import { responseErrorStruct } from '@ouroboros/body';
-import { userType } from '../../Myself';
+import { userType } from '@ouroboros/brain-react';
 export type AccountProps = {
     onClose: () => void;
     onDetailsChanged?: (user: userType) => void;
@@ -28,7 +28,7 @@ export type AccountProps = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function Account(props: AccountProps): JSX.Element | null;
+declare function Account(props: AccountProps): React.JSX.Element | null;
 declare namespace Account {
     var propTypes: {
         onClose: PropTypes.Validator<(...args: any[]) => any>;

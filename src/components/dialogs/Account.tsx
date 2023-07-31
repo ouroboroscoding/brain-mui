@@ -10,6 +10,7 @@
 // Ouroboros modules
 import { errors as bodyErrors } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
+import { useUser, update } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import { Tree } from '@ouroboros/define';
 import { Form } from '@ouroboros/define-mui';
@@ -24,9 +25,6 @@ import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-
-// Local modules
-import { useUser, update } from '../../Myself';
 
 // Generate the E-Mail change tree Trees
 const EmailTree = new Tree({
@@ -92,7 +90,7 @@ const UserTree = new Tree(UserDef, {
 
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
-import { userType } from '../../Myself';
+import { userType } from '@ouroboros/brain-react';
 export type AccountProps = {
 	onClose: () => void,
 	onDetailsChanged?: (user: userType) => void,

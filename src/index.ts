@@ -1,6 +1,3 @@
-// Manage signed in user
-export * as Myself from './Myself';
-
 // Pages
 export { default as ForgotPage } from './components/pages/Forgot';
 export type { ForgotProps as ForgotPageProps } from './components/pages/Forgot';
@@ -16,20 +13,3 @@ export { default as AccountDialog } from './components/dialogs/Account';
 export type { AccountProps as AccountDialogProps } from './components/dialogs/Account';
 export { default as SignInDialog } from './components/dialogs/SignIn';
 export type { SignInProps as SignInDialogProps } from './components/dialogs/SignIn';
-
-// Permission rights constants
-export const RIGHTS = {
-	CREATE: 1,
-	READ: 2,
-	UPDATE: 4,
-	DELETE: 8,
-	ALL: 15
-};
-
-// Rights by permission
-export type rightsStruct = {
-	create?: true,
-	delete?: true,
-	read?: true,
-	update?: true
-}
