@@ -11,10 +11,11 @@
 import PropTypes from 'prop-types';
 export type PermissionProps = {
     allowed: number;
-    onChange: (name: string, checked: number) => void;
+    labels: Record<string, string>;
+    onChange: (name: string, rights: Record<string, number>) => void;
     name: string;
     title: string;
-    value: number;
+    value: Record<string, number>;
 };
 /**
  * Permission
@@ -30,10 +31,15 @@ declare function Permission(props: PermissionProps): JSX.Element;
 declare namespace Permission {
     var propTypes: {
         allowed: PropTypes.Validator<number>;
+        labels: PropTypes.Validator<{
+            [x: string]: string | null | undefined;
+        }>;
         onChange: PropTypes.Validator<(...args: any[]) => any>;
         name: PropTypes.Validator<string>;
         title: PropTypes.Validator<string>;
-        value: PropTypes.Validator<number>;
+        value: PropTypes.Validator<{
+            [x: string]: number | null | undefined;
+        }>;
     };
 }
 export default Permission;

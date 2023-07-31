@@ -8,12 +8,12 @@
  * @created 2023-03-06
  */
 // Ouroboros modules
-import brain from '@ouroboros/brain';
+import brain, { RIGHTS_ALL_ID } from '@ouroboros/brain';
 import clone from '@ouroboros/clone';
-import { afindi, arrayFindDelete } from '@ouroboros/tools';
+import { afindi, arrayFindDelete, merge } from '@ouroboros/tools';
 // NPM modules
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // Material UI
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -41,6 +41,8 @@ export default function Permissions(props) {
     const [tab, tabSet] = useState(0);
     const [portalMenu, portalMenuSet] = useState(false);
     const [remaining, remainingSet] = useState([]);
+    // Refs
+    const labelsRef = useRef({ [RIGHTS_ALL_ID]: '*' });
     // Load effect
     useEffect(() => {
         brain.read('permissions', {
@@ -53,6 +55,17 @@ export default function Permissions(props) {
             permissionsSet(data);
         });
     }, [props.value]);
+    // IDs effect
+    useEffect(() => {
+        // Start with the ALL
+        const oIDs = { [RIGHTS_ALL_ID]: '*' };
+        // If we have IDs
+        if (props.ids && props.ids.length) {
+            merge(oIDs, props.ids);
+        }
+        // Store the new ref
+        labelsRef.current = oIDs;
+    }, [props.ids]);
     // Remaining effect
     useEffect(() => {
         // Copy the possible portals
@@ -69,17 +82,13 @@ export default function Permissions(props) {
     function change(name, val) {
         // Clone the current values
         const dPermissions = clone(permissions);
-        // If we don't have the name yet
-        if (!dPermissions[tab].rights[name]) {
-            dPermissions[tab].rights[name] = 0;
-        }
-        // Set the rights
-        if (val) {
-            dPermissions[tab].rights[name] = val;
-        }
-        // Else, remove the permission
-        else {
+        // If we got null, remove all rights
+        if (val === null) {
             delete dPermissions[tab].rights[name];
+        }
+        // Else, update / add the rights
+        else {
+            dPermissions[tab].rights[name] = val;
         }
         // Update the state
         permissionsSet(dPermissions);
@@ -146,20 +155,22 @@ export default function Permissions(props) {
                     portalAdd(o);
                 } }, o.title))),
         props.sections.map(section => React.createElement(Paper, { key: section.title, className: "permissions" },
-            React.createElement(Grid, { container: true, spacing: 2 },
-                React.createElement(Grid, { item: true, md: 2, xs: 7, className: "group_title" }, section.title),
-                React.createElement(Grid, { item: true, md: 2, xs: 1, className: "right_title" }, "All"),
-                React.createElement(Grid, { item: true, md: 2, xs: 1, className: "right_title" }, "Create"),
-                React.createElement(Grid, { item: true, md: 2, xs: 1, className: "right_title" }, "Read"),
-                React.createElement(Grid, { item: true, md: 2, xs: 1, className: "right_title" }, "Update"),
-                React.createElement(Grid, { item: true, md: 2, xs: 1, className: "right_title" }, "Delete"),
-                section.rights.map(perm => React.createElement(Permission, { allowed: perm.allowed, key: perm.name, name: perm.name, onChange: change, title: perm.title, value: (permissions && permissions[tab] && permissions[tab].rights[perm.name]) || 0 }))))),
+            React.createElement(Grid, { container: true, spacing: 0 },
+                React.createElement(Grid, { item: true, xs: 12, md: 6, className: "group_title" }, section.title),
+                React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "All"),
+                React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Create"),
+                React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Read"),
+                React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Update"),
+                React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Delete"),
+                section.rights.map(perm => React.createElement(Permission, { allowed: perm.allowed, key: perm.name, labels: labelsRef.current, name: perm.name, onChange: change, title: perm.title, value: (permissions && permissions[tab] && permissions[tab].rights[perm.name]) || 0 })),
+                React.createElement(Grid, { item: true, xs: 2, md: 1 }, "\u00A0")))),
         React.createElement(Box, { className: "actions" },
             React.createElement(Button, { variant: "contained", color: "secondary", onClick: props.onClose }, "Cancel"),
             React.createElement(Button, { variant: "contained", color: "primary", onClick: update }, "Update"))));
 }
 // Force props
 Permissions.propTypes = {
+    ids: PropTypes.objectOf(PropTypes.string),
     onClose: PropTypes.func.isRequired,
     onUpdate: PropTypes.func,
     portals: PropTypes.arrayOf(PropTypes.exact({

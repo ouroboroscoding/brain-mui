@@ -10,6 +10,7 @@
 // Ouroboros modules
 import { errors as bodyErrors } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
+import { signin, useUser } from '@ouroboros/brain-react';
 import { errorTree } from '@ouroboros/define-mui';
 // NPM modules
 import PropTypes from 'prop-types';
@@ -23,8 +24,6 @@ import DialogActions from '@mui/material/DialogActions';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-// Local modules
-import { signin, useUser } from '../../Myself';
 /**
  * Sign In
  *

@@ -9,13 +9,13 @@
  */
 
 // Ouroboros modules
-import brain from '@ouroboros/brain';
+import brain, { RIGHTS_ALL_ID } from '@ouroboros/brain';
 import clone from '@ouroboros/clone';
-import { afindi, arrayFindDelete } from '@ouroboros/tools';
+import { afindi, arrayFindDelete, merge } from '@ouroboros/tools';
 
 // NPM modules
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Material UI
 import Box from '@mui/material/Box';
@@ -32,11 +32,12 @@ import Permission from './Permission';
 
 // Types
 export type PermissionsProps = {
+	ids?: Record<string, string>,
 	onClose: () => void,
 	onUpdate?: () => void,
 	portals: PortalStruct[],
 	sections: SectionStruct[],
-	value: Record<string, number>
+	value: Record<string, Record<string, number>>
 }
 export type PermissionsRecord = {
 	_created?: number,
@@ -44,7 +45,7 @@ export type PermissionsRecord = {
 	user: string,
 	portal: string,
 	title: string,
-	rights: Record<string, number>
+	rights: Record<string, Record<string, number>>
 }
 export type PermissionStruct = {
 	name: string,
@@ -82,6 +83,9 @@ export default function Permissions(props: PermissionsProps) {
 	const [portalMenu, portalMenuSet] = useState<portalMenuStruct | false>(false);
 	const [remaining, remainingSet] = useState<PortalStruct[]>([]);
 
+	// Refs
+	const labelsRef = useRef({ [RIGHTS_ALL_ID]: '*' });
+
 	// Load effect
 	useEffect(() => {
 		brain.read('permissions', {
@@ -94,6 +98,22 @@ export default function Permissions(props: PermissionsProps) {
 			permissionsSet(data);
 		});
 	}, [props.value]);
+
+	// IDs effect
+	useEffect(() => {
+
+		// Start with the ALL
+		const oIDs = { [RIGHTS_ALL_ID]: '*' };
+
+		// If we have IDs
+		if(props.ids && props.ids.length) {
+			merge(oIDs, props.ids);
+		}
+
+		// Store the new ref
+		labelsRef.current = oIDs;
+
+	}, [props.ids]);
 
 	// Remaining effect
 	useEffect(() => {
@@ -114,24 +134,19 @@ export default function Permissions(props: PermissionsProps) {
 	}, [props.portals, permissions])
 
 	// Called when any permission is changed
-	function change(name: string, val: number) {
+	function change(name: string, val: Record<string, number> | null) {
 
 		// Clone the current values
 		const dPermissions = clone(permissions);
 
-		// If we don't have the name yet
-		if(!dPermissions[tab].rights[name]) {
-			dPermissions[tab].rights[name] = 0;
-		}
-
-		// Set the rights
-		if(val) {
-			dPermissions[tab].rights[name] = val;
-		}
-
-		// Else, remove the permission
-		else {
+		// If we got null, remove all rights
+		if(val === null) {
 			delete dPermissions[tab].rights[name];
+		}
+
+		// Else, update / add the rights
+		else {
+			dPermissions[tab].rights[name] = val;
 		}
 
 		// Update the state
@@ -233,23 +248,25 @@ export default function Permissions(props: PermissionsProps) {
 			}
 			{props.sections.map(section =>
 				<Paper key={section.title} className="permissions">
-					<Grid container spacing={2}>
-						<Grid item md={2} xs={7} className="group_title">{section.title}</Grid>
-						<Grid item md={2} xs={1} className="right_title">All</Grid>
-						<Grid item md={2} xs={1} className="right_title">Create</Grid>
-						<Grid item md={2} xs={1} className="right_title">Read</Grid>
-						<Grid item md={2} xs={1} className="right_title">Update</Grid>
-						<Grid item md={2} xs={1} className="right_title">Delete</Grid>
+					<Grid container spacing={0}>
+						<Grid item xs={12} md={6} className="group_title">{section.title}</Grid>
+						<Grid item xs={2} md={1} className="right_title">All</Grid>
+						<Grid item xs={2} md={1} className="right_title">Create</Grid>
+						<Grid item xs={2} md={1} className="right_title">Read</Grid>
+						<Grid item xs={2} md={1} className="right_title">Update</Grid>
+						<Grid item xs={2} md={1} className="right_title">Delete</Grid>
 						{section.rights.map(perm =>
 							<Permission
 								allowed={perm.allowed}
 								key={perm.name}
+								labels={labelsRef.current}
 								name={perm.name}
 								onChange={change}
 								title={perm.title}
 								value={(permissions && permissions[tab] && permissions[tab].rights[perm.name]) || 0}
 							/>
 						)}
+						<Grid item xs={2} md={1}>&nbsp;</Grid>
 					</Grid>
 				</Paper>
 			)}
@@ -263,6 +280,7 @@ export default function Permissions(props: PermissionsProps) {
 
 // Force props
 Permissions.propTypes = {
+	ids: PropTypes.objectOf(PropTypes.string),
 	onClose: PropTypes.func.isRequired,
 	onUpdate: PropTypes.func,
 	portals: PropTypes.arrayOf(PropTypes.exact({

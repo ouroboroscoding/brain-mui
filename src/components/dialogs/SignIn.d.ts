@@ -9,8 +9,8 @@
  */
 /// <reference types="react" />
 import { responseErrorStruct } from '@ouroboros/body';
+import { signinReturn } from '@ouroboros/brain-react';
 import PropTypes from 'prop-types';
-import { signinReturn } from '../../Myself';
 export type SignInProps = {
     forgotUrl: string;
     onError?: (error: responseErrorStruct) => void;

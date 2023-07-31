@@ -10,11 +10,12 @@
 /// <reference types="react" />
 import PropTypes from 'prop-types';
 export type PermissionsProps = {
+    ids?: Record<string, string>;
     onClose: () => void;
     onUpdate?: () => void;
     portals: PortalStruct[];
     sections: SectionStruct[];
-    value: Record<string, number>;
+    value: Record<string, Record<string, number>>;
 };
 export type PermissionsRecord = {
     _created?: number;
@@ -22,7 +23,7 @@ export type PermissionsRecord = {
     user: string;
     portal: string;
     title: string;
-    rights: Record<string, number>;
+    rights: Record<string, Record<string, number>>;
 };
 export type PermissionStruct = {
     name: string;
@@ -50,6 +51,9 @@ export type SectionStruct = {
 declare function Permissions(props: PermissionsProps): JSX.Element;
 declare namespace Permissions {
     var propTypes: {
+        ids: PropTypes.Requireable<{
+            [x: string]: string | null | undefined;
+        }>;
         onClose: PropTypes.Validator<(...args: any[]) => any>;
         onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
         portals: PropTypes.Validator<(Required<PropTypes.InferProps<{

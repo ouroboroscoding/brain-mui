@@ -8,6 +8,7 @@
  */
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
+import { useRights } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import clone from '@ouroboros/clone';
 import { Tree } from '@ouroboros/define';
@@ -29,8 +30,6 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 // Composites
 import Permissions from './Permissions';
-// Local modules
-import { useRights } from '../../../Myself';
 // Generate the user Tree
 const UserTree = new Tree(UserDef, {
     __ui__: {

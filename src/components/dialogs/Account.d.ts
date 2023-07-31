@@ -9,7 +9,7 @@
 /// <reference types="react" />
 import PropTypes from 'prop-types';
 import { responseErrorStruct } from '@ouroboros/body';
-import { userType } from '../../Myself';
+import { userType } from '@ouroboros/brain-react';
 export type AccountProps = {
     onClose: () => void;
     onDetailsChanged?: (user: userType) => void;

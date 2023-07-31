@@ -11,6 +11,7 @@
 // Ouroboros modules
 import { errors as bodyErrors, responseErrorStruct } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
+import { signin, signinReturn, useUser } from '@ouroboros/brain-react';
 import { errorTree } from '@ouroboros/define-mui';
 
 // NPM modules
@@ -26,9 +27,6 @@ import DialogActions from '@mui/material/DialogActions';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-
-// Local modules
-import { signin, signinReturn, useUser } from '../../Myself';
 
 // Types
 export type SignInProps = {
