@@ -7,24 +7,32 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-03-06
  */
-/// <reference types="react" />
 import PropTypes from 'prop-types';
+import React from 'react';
 export type PermissionsProps = {
+    ids?: Record<string, string>;
     onClose: () => void;
     onUpdate?: () => void;
+    portals: PortalStruct[];
     sections: SectionStruct[];
-    value: Record<string, number>;
+    value: Record<string, Record<string, number>>;
 };
 export type PermissionsRecord = {
-    _user: string;
     _created?: number;
     _updated?: number;
-    rights: Record<string, number>;
+    user: string;
+    portal: string;
+    title: string;
+    rights: Record<string, Record<string, number>>;
 };
 export type PermissionStruct = {
     name: string;
     title: string;
     allowed: number;
+};
+export type PortalStruct = {
+    key: string | null;
+    title: string;
 };
 export type SectionStruct = {
     title: string;
@@ -40,11 +48,18 @@ export type SectionStruct = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function Permissions(props: PermissionsProps): JSX.Element;
+declare function Permissions(props: PermissionsProps): React.JSX.Element;
 declare namespace Permissions {
     var propTypes: {
+        ids: PropTypes.Requireable<{
+            [x: string]: string | null | undefined;
+        }>;
         onClose: PropTypes.Validator<(...args: any[]) => any>;
         onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        portals: PropTypes.Validator<(Required<PropTypes.InferProps<{
+            key: PropTypes.Requireable<string>;
+            title: PropTypes.Validator<string>;
+        }>> | null | undefined)[]>;
         sections: PropTypes.Validator<(Required<PropTypes.InferProps<{
             title: PropTypes.Validator<string>;
             rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{

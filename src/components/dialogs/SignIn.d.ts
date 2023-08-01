@@ -7,10 +7,10 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-01-17
  */
-/// <reference types="react" />
 import { responseErrorStruct } from '@ouroboros/body';
+import { signinReturn } from '@ouroboros/brain-react';
 import PropTypes from 'prop-types';
-import { signinReturn } from '../../Myself';
+import React from 'react';
 export type SignInProps = {
     forgotUrl: string;
     onError?: (error: responseErrorStruct) => void;
@@ -27,7 +27,7 @@ export type SignInProps = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function SignIn(props: SignInProps): JSX.Element | null;
+declare function SignIn(props: SignInProps): React.JSX.Element | null;
 declare namespace SignIn {
     var propTypes: {
         forgotUrl: PropTypes.Validator<string>;

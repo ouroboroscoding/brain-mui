@@ -9,6 +9,7 @@
 // Ouroboros modules
 import { errors as bodyErrors } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
+import { useUser, update } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import { Tree } from '@ouroboros/define';
 import { Form } from '@ouroboros/define-mui';
@@ -21,8 +22,6 @@ import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-// Local modules
-import { useUser, update } from '../../Myself';
 // Generate the E-Mail change tree Trees
 const EmailTree = new Tree({
     __name__: 'PSUEDO_Brain_Email',

@@ -9,6 +9,7 @@
 
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
+import { useRights } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import clone from '@ouroboros/clone';
 import { Tree } from '@ouroboros/define';
@@ -34,18 +35,16 @@ import Tooltip from '@mui/material/Tooltip';
 // Composites
 import Permissions from './Permissions';
 
-// Local modules
-import { useRights } from '../../../Myself';
-
 // Types
 import { actionStruct, componentConstructor } from '@ouroboros/define-mui/src/Results/Row';
 import { gridSizesStruct } from '@ouroboros/define-mui/src/DefineParent';
-import { SectionStruct } from './Permissions';
+import { PortalStruct, SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
-	allowedPermissions: SectionStruct,
+	allowedPermissions: SectionStruct[],
 	onError?: (error: responseErrorStruct) => void,
-	onSuccess?: (type: string, data?: any) => void
+	onSuccess?: (type: string, data?: any) => void,
+	portals: PortalStruct[]
 }
 
 // Generate the user Tree
@@ -280,12 +279,13 @@ export default function Users(props: UsersProps) {
 			icon: 'fa-solid fa-list',
 			component: Permissions as unknown as React.FunctionComponent<{ onClose: () => void; value: Record<string, any>; }>,
 			props: {
-				sections: props.allowedPermissions,
 				onUpdate: () => {
 					if(props.onSuccess) {
 						props.onSuccess('permissions');
 					}
-				}
+				},
+				portals: props.portals,
+				sections: props.allowedPermissions
 			}
 		});
 	}
@@ -321,13 +321,15 @@ export default function Users(props: UsersProps) {
 					/>
 				</Paper>
 			}
-			<Search
-				hash="users"
-				name="users"
-				onSearch={search}
-				ref={refSearch}
-				tree={UserTree}
-			/>
+			{rightsUser.read &&
+				<Search
+					hash="users"
+					name="users"
+					onSearch={search}
+					ref={refSearch}
+					tree={UserTree}
+				/>
+			}
 			<Results
 				actions={lActions}
 				data={records}
@@ -375,5 +377,14 @@ Users.propTypes = {
 		}))
 	})).isRequired,
 	onError: PropTypes.func,
-	onSuccess: PropTypes.func
+	onSuccess: PropTypes.func,
+	portals: PropTypes.arrayOf(PropTypes.exact({
+		key: PropTypes.string,
+		title: PropTypes.string.isRequired
+	}))
+}
+
+// Default props
+Users.defaultProps = {
+	portals: [ { key: '', title: 'Default' } ]
 }

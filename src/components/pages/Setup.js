@@ -8,6 +8,7 @@
  */
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
+import { update } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import { Parent } from '@ouroboros/define';
 import { DefineParent, errorTree } from '@ouroboros/define-mui';
@@ -20,8 +21,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-// Local modules
-import { update } from '../../Myself';
 // Create the Parents
 const PasswdParent = new Parent({
     __name__: 'PSUEDO_Brain_Passwd_New',

@@ -8,6 +8,7 @@
  */
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
+import { useRights } from '@ouroboros/brain-react';
 import UserDef from '@ouroboros/brain/definitions/user.json';
 import clone from '@ouroboros/clone';
 import { Tree } from '@ouroboros/define';
@@ -29,8 +30,6 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 // Composites
 import Permissions from './Permissions';
-// Local modules
-import { useRights } from '../../../Myself';
 // Generate the user Tree
 const UserTree = new Tree(UserDef, {
     __ui__: {
@@ -228,12 +227,13 @@ export default function Users(props) {
             icon: 'fa-solid fa-list',
             component: Permissions,
             props: {
-                sections: props.allowedPermissions,
                 onUpdate: () => {
                     if (props.onSuccess) {
                         props.onSuccess('permissions');
                     }
-                }
+                },
+                portals: props.portals,
+                sections: props.allowedPermissions
             }
         });
     }
@@ -253,7 +253,8 @@ export default function Users(props) {
         rightsUser.create && createForm &&
             React.createElement(Paper, { className: "padding" },
                 React.createElement(Form, { gridSizes: GRID_SIZES, onCancel: () => createFormSet(false), onSubmit: create, tree: UserTree, type: "create" })),
-        React.createElement(Search, { hash: "users", name: "users", onSearch: search, ref: refSearch, tree: UserTree }),
+        rightsUser.read &&
+            React.createElement(Search, { hash: "users", name: "users", onSearch: search, ref: refSearch, tree: UserTree }),
         React.createElement(Results, { actions: lActions, data: records, gridSizes: GRID_SIZES, onUpdate: rightsUser.update ? update : false, orderBy: "email", tree: UserTree }),
         password &&
             React.createElement(Dialog, { "aria-labelledby": "password-dialog-title", maxWidth: "lg", onClose: ev => passwordSet(false), open: true },
@@ -275,5 +276,13 @@ Users.propTypes = {
         }))
     })).isRequired,
     onError: PropTypes.func,
-    onSuccess: PropTypes.func
+    onSuccess: PropTypes.func,
+    portals: PropTypes.arrayOf(PropTypes.exact({
+        key: PropTypes.string,
+        title: PropTypes.string.isRequired
+    }))
+};
+// Default props
+Users.defaultProps = {
+    portals: [{ key: '', title: 'Default' }]
 };
