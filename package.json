@@ -1,6 +1,6 @@
 {
 	"name": "@ouroboros/brain-mui",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"description": "Components for use with the Brain service",
 	"main": "src/index.js",
 	"types": "src/index.d.ts",
@@ -39,7 +39,7 @@
 		"@ouroboros/clone": "^1.0.1",
 		"@ouroboros/define": "^1.0.2",
 		"@ouroboros/define-mui": "^1.4.0",
-		"@ouroboros/tools": "^0.5.0",
+		"@ouroboros/tools": "^0.5.1",
 		"prop-types": "^15.8.1",
 		"uuid": "^9.0.0"
 	},
