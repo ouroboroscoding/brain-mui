@@ -263,7 +263,10 @@ export default function Permissions(props: PermissionsProps) {
 								name={perm.name}
 								onChange={change}
 								title={perm.title}
-								value={(permissions && permissions[tab] && permissions[tab].rights[perm.name]) || 0}
+								value={(permissions &&
+										permissions[tab] &&
+										permissions[tab].rights[perm.name]
+								) || {}}
 							/>
 						)}
 						<Grid item xs={2} md={1}>&nbsp;</Grid>

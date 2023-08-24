@@ -10,10 +10,8 @@
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
 import { useRights } from '@ouroboros/brain-react';
-import UserDef from '@ouroboros/brain/definitions/user.json';
 import clone from '@ouroboros/clone';
-import { Tree } from '@ouroboros/define';
-import { Form, Results, Search } from '@ouroboros/define-mui';
+import { Results, Search } from '@ouroboros/define-mui';
 import { afindi, merge } from '@ouroboros/tools';
 
 // NPM modules
@@ -33,11 +31,14 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 
 // Composites
+import UserCreate from '../../composites/UserCreate';
+import UserSearch from '../../composites/UserSearch';
+
+// Local
 import Permissions from './Permissions';
 
 // Types
-import { actionStruct, componentConstructor } from '@ouroboros/define-mui/src/Results/Row';
-import { gridSizesStruct } from '@ouroboros/define-mui/src/DefineParent';
+import { actionStruct } from '@ouroboros/define-mui/src/Results/Row';
 import { PortalStruct, SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
@@ -47,28 +48,8 @@ export type UsersProps = {
 	portals: PortalStruct[]
 }
 
-// Generate the user Tree
-const UserTree = new Tree(UserDef, {
-	__ui__: {
-		__create__: ['email', 'title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext'],
-		__results__: ['_id', 'email', 'title', 'first_name', 'last_name', 'suffix'],
-		__search__: ['_id', 'email', 'first_name', 'last_name', 'phone_number'],
-		__update__: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
-	},
-	title: { __ui__: { __title__: 'Dr. Mrs. Miss...'}},
-	suffix: { __ui__: { __title__: 'PhD, RN, Esq...'}}
-});
-
 // Constants
-const GRID_SIZES: gridSizesStruct = {
-	__default__: {xs:12},
-	title: {xs: 12, sm: 3, lg: 2},
-	first_name: {xs: 12, sm: 9, lg: 4},
-	last_name: {xs: 12, sm: 9, lg: 4},
-	suffix: {xs: 12, sm: 3, lg: 2},
-	phone_number: {xs: 12, sm: 8},
-	phone_ext: {xs: 12, sm: 4}
-};
+import { GRID_SIZES, UserTree } from '../../../shared';
 
 /**
  * Users
@@ -119,57 +100,6 @@ export default function Users(props: UsersProps) {
 
 	}, [rightsUser]);
 
-	// Called when the create form is submitted
-	function create(user: any): Promise<boolean> {
-
-		// Add the url to the user data
-		user.url = 'https://' + window.location.host + '/setup/{key}'
-
-		// Create a new Promise and return it
-		return new Promise((resolve, reject) => {
-
-			// Make the request to the server
-			brain.create('user', user).then((data: string) => {
-
-				// If we were successful
-				if(data) {
-
-					// If we have an onSuccess prop
-					if(props.onSuccess) {
-						props.onSuccess('create', user);
-					}
-
-					// Add the ID to the user
-					user._id = data;
-
-					// Hide the form, overwrite the results, and clear the
-					//	search
-					createFormSet(false);
-					recordsSet([user]);
-					if(refSearch.current) {
-						refSearch.current.reset();
-					}
-				}
-
-				// Resolve
-				resolve(true);
-
-			}, (error: responseErrorStruct) => {
-				if(error.code === errors.body.DATA_FIELDS) {
-					reject(error.msg);
-				} else if(error.code === errors.body.DB_DUPLICATE) {
-					reject({email: 'Already in use'});
-				} else {
-					if(props.onError) {
-						props.onError(error);
-					} else {
-						throw new Error(JSON.stringify(error));
-					}
-				}
-			});
-		});
-	}
-
 	// Called to update the user's password
 	function passwordUpdate() {
 
@@ -189,33 +119,6 @@ export default function Users(props: UsersProps) {
 				}
 				passwordSet(false);
 			}
-		});
-	}
-
-	// Called when search is submitted
-	function search(filter: any): Promise<boolean> {
-
-		// Create a new Promise and return it
-		return new Promise((resolve, reject) => {
-
-			// Fetch the records from the server
-			brain.read('search', { filter }).then((data: any[]) => {
-
-				// Set the new records
-				recordsSet(data);
-
-				// Resolve
-				resolve(true);
-
-			}, (error: responseErrorStruct) => {
-				if(error.code === errors.body.DATA_FIELDS) {
-					reject(error.msg);
-				} else {
-					if(props.onError) {
-						props.onError(error);
-					}
-				}
-			});
 		});
 	}
 
@@ -312,22 +215,22 @@ export default function Users(props: UsersProps) {
 			</Box>
 			{rightsUser.create && createForm &&
 				<Paper className="padding">
-					<Form
-						gridSizes={GRID_SIZES}
+					<UserCreate
 						onCancel={() => createFormSet(false)}
-						onSubmit={create}
-						tree={UserTree}
-						type="create"
+						onError={props.onError}
+						onSuccess={(user: any) => {
+							createFormSet(false);
+							recordsSet([user]);
+							if(refSearch.current) {
+								refSearch.current.reset();
+							}
+						}}
 					/>
 				</Paper>
 			}
 			{rightsUser.read &&
-				<Search
-					hash="users"
-					name="users"
-					onSearch={search}
-					ref={refSearch}
-					tree={UserTree}
+				<UserSearch
+					onSuccess={recordsSet}
 				/>
 			}
 			<Results
