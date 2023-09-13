@@ -162,7 +162,9 @@ export default function Permissions(props) {
                 React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Read"),
                 React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Update"),
                 React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "Delete"),
-                section.rights.map(perm => React.createElement(Permission, { allowed: perm.allowed, key: perm.name, labels: labelsRef.current, name: perm.name, onChange: change, title: perm.title, value: (permissions && permissions[tab] && permissions[tab].rights[perm.name]) || 0 })),
+                section.rights.map(perm => React.createElement(Permission, { allowed: perm.allowed, key: perm.name, labels: labelsRef.current, name: perm.name, onChange: change, title: perm.title, value: (permissions &&
+                        permissions[tab] &&
+                        permissions[tab].rights[perm.name]) || {} })),
                 React.createElement(Grid, { item: true, xs: 2, md: 1 }, "\u00A0")))),
         React.createElement(Box, { className: "actions" },
             React.createElement(Button, { variant: "contained", color: "secondary", onClick: props.onClose }, "Cancel"),
