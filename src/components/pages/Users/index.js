@@ -9,10 +9,8 @@
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
 import { useRights } from '@ouroboros/brain-react';
-import UserDef from '@ouroboros/brain/definitions/user.json';
 import clone from '@ouroboros/clone';
-import { Tree } from '@ouroboros/define';
-import { Form, Results, Search } from '@ouroboros/define-mui';
+import { Results } from '@ouroboros/define-mui';
 import { afindi, merge } from '@ouroboros/tools';
 // NPM modules
 import PropTypes from 'prop-types';
@@ -29,28 +27,12 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 // Composites
+import UserCreate from '../../composites/UserCreate';
+import UserSearch from '../../composites/UserSearch';
+// Local
 import Permissions from './Permissions';
-// Generate the user Tree
-const UserTree = new Tree(UserDef, {
-    __ui__: {
-        __create__: ['email', 'title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext'],
-        __results__: ['_id', 'email', 'title', 'first_name', 'last_name', 'suffix'],
-        __search__: ['_id', 'email', 'first_name', 'last_name', 'phone_number'],
-        __update__: ['title', 'first_name', 'last_name', 'suffix', 'phone_number', 'phone_ext']
-    },
-    title: { __ui__: { __title__: 'Dr. Mrs. Miss...' } },
-    suffix: { __ui__: { __title__: 'PhD, RN, Esq...' } }
-});
 // Constants
-const GRID_SIZES = {
-    __default__: { xs: 12 },
-    title: { xs: 12, sm: 3, lg: 2 },
-    first_name: { xs: 12, sm: 9, lg: 4 },
-    last_name: { xs: 12, sm: 9, lg: 4 },
-    suffix: { xs: 12, sm: 3, lg: 2 },
-    phone_number: { xs: 12, sm: 8 },
-    phone_ext: { xs: 12, sm: 4 }
-};
+import { GRID_SIZES, UserTree } from '../../../shared';
 /**
  * Users
  *
@@ -92,50 +74,6 @@ export default function Users(props) {
             passwordSet(false);
         }
     }, [rightsUser]);
-    // Called when the create form is submitted
-    function create(user) {
-        // Add the url to the user data
-        user.url = 'https://' + window.location.host + '/setup/{key}';
-        // Create a new Promise and return it
-        return new Promise((resolve, reject) => {
-            // Make the request to the server
-            brain.create('user', user).then((data) => {
-                // If we were successful
-                if (data) {
-                    // If we have an onSuccess prop
-                    if (props.onSuccess) {
-                        props.onSuccess('create', user);
-                    }
-                    // Add the ID to the user
-                    user._id = data;
-                    // Hide the form, overwrite the results, and clear the
-                    //	search
-                    createFormSet(false);
-                    recordsSet([user]);
-                    if (refSearch.current) {
-                        refSearch.current.reset();
-                    }
-                }
-                // Resolve
-                resolve(true);
-            }, (error) => {
-                if (error.code === errors.body.DATA_FIELDS) {
-                    reject(error.msg);
-                }
-                else if (error.code === errors.body.DB_DUPLICATE) {
-                    reject({ email: 'Already in use' });
-                }
-                else {
-                    if (props.onError) {
-                        props.onError(error);
-                    }
-                    else {
-                        throw new Error(JSON.stringify(error));
-                    }
-                }
-            });
-        });
-    }
     // Called to update the user's password
     function passwordUpdate() {
         // If we don't have a new password
@@ -153,28 +91,6 @@ export default function Users(props) {
                 }
                 passwordSet(false);
             }
-        });
-    }
-    // Called when search is submitted
-    function search(filter) {
-        // Create a new Promise and return it
-        return new Promise((resolve, reject) => {
-            // Fetch the records from the server
-            brain.read('search', { filter }).then((data) => {
-                // Set the new records
-                recordsSet(data);
-                // Resolve
-                resolve(true);
-            }, (error) => {
-                if (error.code === errors.body.DATA_FIELDS) {
-                    reject(error.msg);
-                }
-                else {
-                    if (props.onError) {
-                        props.onError(error);
-                    }
-                }
-            });
         });
     }
     // Called when update form is submitted
@@ -252,9 +168,15 @@ export default function Users(props) {
                             React.createElement("i", { className: 'fa-solid fa-user-plus' + (createForm ? ' open' : '') }))))),
         rightsUser.create && createForm &&
             React.createElement(Paper, { className: "padding" },
-                React.createElement(Form, { gridSizes: GRID_SIZES, onCancel: () => createFormSet(false), onSubmit: create, tree: UserTree, type: "create" })),
+                React.createElement(UserCreate, { onCancel: () => createFormSet(false), onError: props.onError, onSuccess: (user) => {
+                        createFormSet(false);
+                        recordsSet([user]);
+                        if (refSearch.current) {
+                            refSearch.current.reset();
+                        }
+                    } })),
         rightsUser.read &&
-            React.createElement(Search, { hash: "users", name: "users", onSearch: search, ref: refSearch, tree: UserTree }),
+            React.createElement(UserSearch, { onSuccess: recordsSet }),
         React.createElement(Results, { actions: lActions, data: records, gridSizes: GRID_SIZES, onUpdate: rightsUser.update ? update : false, orderBy: "email", tree: UserTree }),
         password &&
             React.createElement(Dialog, { "aria-labelledby": "password-dialog-title", maxWidth: "lg", onClose: ev => passwordSet(false), open: true },
