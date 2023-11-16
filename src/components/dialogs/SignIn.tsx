@@ -149,6 +149,11 @@ export default function SignIn(props: SignInProps) {
 				fieldErrorsSet({general: 'Email or password invalid'});
 			}
 
+			// Else, if the portal is invalid
+			else if(error.code === errors.BAD_PORTAL) {
+				fieldErrorsSet({general: 'You do not have access to this portal'});
+			}
+
 			// Else, unknown error
 			else {
 				if(props.onError) {
