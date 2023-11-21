@@ -38,7 +38,7 @@ import Permission from './Permission';
 export default function Permissions(props) {
     // State
     const [permissions, permissionsSet] = useState([]);
-    const [tab, tabSet] = useState(0);
+    const [tab, tabSet] = useState(-1);
     const [portalMenu, portalMenuSet] = useState(false);
     const [remaining, remainingSet] = useState([]);
     // Refs
@@ -53,6 +53,9 @@ export default function Permissions(props) {
                 o.title = i > -1 ? props.portals[i].title : 'UNKNOWN';
             }
             permissionsSet(data);
+            if (permissions.length > 0) {
+                tabSet(0);
+            }
         });
     }, [props.value]);
     // IDs effect
@@ -95,6 +98,8 @@ export default function Permissions(props) {
     }
     // Called to add a portal to the permissions
     function portalAdd(portal) {
+        // Get the current length of the permissions
+        const iLength = permissions.length;
         // Add the portal to the data
         permissionsSet((val) => {
             const lPerms = clone(val);
@@ -110,7 +115,7 @@ export default function Permissions(props) {
             return arrayFindDelete(val, 'key', portal.key, true);
         });
         // Set the new tab
-        tabSet(remaining.length);
+        tabSet(iLength);
     }
     // Called to display the menu to add a location to the order
     function portalAddMenu(ev) {
@@ -154,7 +159,7 @@ export default function Permissions(props) {
                     portalMenuSet(false);
                     portalAdd(o);
                 } }, o.title))),
-        props.sections.map(section => React.createElement(Paper, { key: section.title, className: "permissions" },
+        tab > -1 && props.sections.map(section => React.createElement(Paper, { key: section.title, className: "permissions" },
             React.createElement(Grid, { container: true, spacing: 0 },
                 React.createElement(Grid, { item: true, xs: 12, md: 6, className: "group_title" }, section.title),
                 React.createElement(Grid, { item: true, xs: 2, md: 1, className: "right_title" }, "All"),
