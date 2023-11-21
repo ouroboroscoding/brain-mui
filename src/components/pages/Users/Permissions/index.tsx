@@ -79,7 +79,7 @@ export default function Permissions(props: PermissionsProps) {
 
 	// State
 	const [permissions, permissionsSet] = useState<PermissionsRecord[]>([]);
-	const [tab, tabSet] = useState<number>(0);
+	const [tab, tabSet] = useState<number>(-1);
 	const [portalMenu, portalMenuSet] = useState<portalMenuStruct | false>(false);
 	const [remaining, remainingSet] = useState<PortalStruct[]>([]);
 
@@ -96,6 +96,9 @@ export default function Permissions(props: PermissionsProps) {
 				o.title = i > -1 ? props.portals[i].title : 'UNKNOWN';
 			}
 			permissionsSet(data);
+			if(permissions.length > 0) {
+				tabSet(0);
+			}
 		});
 	}, [props.value]);
 
@@ -156,6 +159,9 @@ export default function Permissions(props: PermissionsProps) {
 	// Called to add a portal to the permissions
 	function portalAdd(portal: PortalStruct) {
 
+		// Get the current length of the permissions
+		const iLength = permissions.length;
+
 		// Add the portal to the data
 		permissionsSet((val: PermissionsRecord[]) => {
 			const lPerms = clone(val);
@@ -175,7 +181,7 @@ export default function Permissions(props: PermissionsProps) {
 		});
 
 		// Set the new tab
-		tabSet(remaining.length);
+		tabSet(iLength);
 	}
 
 	// Called to display the menu to add a location to the order
@@ -246,7 +252,7 @@ export default function Permissions(props: PermissionsProps) {
 					)}
 				</Menu>
 			}
-			{props.sections.map(section =>
+			{tab > -1 && props.sections.map(section =>
 				<Paper key={section.title} className="permissions">
 					<Grid container spacing={0}>
 						<Grid item xs={12} md={6} className="group_title">{section.title}</Grid>
