@@ -33,8 +33,5 @@ declare namespace UserCreate {
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         setupUrl: PropTypes.Requireable<string>;
     };
-    var defaultProps: {
-        setupUrl: string;
-    };
 }
 export default UserCreate;
