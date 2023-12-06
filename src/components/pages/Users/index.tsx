@@ -50,6 +50,7 @@ export type UsersProps = {
 
 // Constants
 import { GRID_SIZES, UserTree } from '../../../shared';
+const SETUP_URL = 'https://' + window.location.host + '/setup/{key}';
 
 /**
  * Users
@@ -175,6 +176,38 @@ export default function Users(props: UsersProps) {
 	// Init the actions
 	const lActions: actionStruct[] = [];
 
+	// If the user can create users
+	if(rightsUser.create) {
+		lActions.push({
+			tooltip: 'Re-send Setup E-Mail',
+			icon: 'fa-solid fa-envelope',
+			callback: user => {
+				brain.create('user/setup/send', {
+					_id: user._id,
+					url: SETUP_URL
+				}).then(data => {
+					if(data) {
+						if(props.onSuccess) {
+							props.onSuccess('setup_sent');
+						}
+					}
+				}, (error: responseErrorStruct) => {
+					if(error.code === errors.body.ALREADY_DONE) {
+						if(props.onSuccess) {
+							props.onSuccess('setup_done');
+						}
+					} else {
+						if(props.onError) {
+							props.onError(error);
+						} else {
+							throw new Error(JSON.stringify(error));
+						}
+					}
+				});
+			}
+		});
+	}
+
 	// If the user can change permissions
 	if(rightsPermission.update) {
 		lActions.push({
@@ -195,7 +228,11 @@ export default function Users(props: UsersProps) {
 
 	// If the user can update other users
 	if(rightsUser.update) {
-		lActions.push({tooltip: "Change User's password", icon: 'fa-solid fa-unlock-keyhole', callback: user => passwordSet(user._id)});
+		lActions.push({
+			tooltip: "Change User's password",
+			icon: 'fa-solid fa-unlock-keyhole',
+			callback: user => passwordSet(user._id)
+		});
 	}
 
 	// Render
@@ -225,6 +262,7 @@ export default function Users(props: UsersProps) {
 								refSearch.current.reset();
 							}
 						}}
+						setupUrl={SETUP_URL}
 					/>
 				</Paper>
 			}

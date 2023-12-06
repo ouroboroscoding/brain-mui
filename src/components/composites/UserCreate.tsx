@@ -106,8 +106,3 @@ UserCreate.propTypes = {
 	onSuccess: PropTypes.func,
 	setupUrl: PropTypes.string
 }
-
-// Default props
-UserCreate.defaultProps = {
-	setupUrl: 'https://' + window.location.host + '/setup/{key}'
-}
