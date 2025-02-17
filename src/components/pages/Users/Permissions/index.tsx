@@ -11,7 +11,7 @@
 // Ouroboros modules
 import brain, { RIGHTS_ALL_ID } from '@ouroboros/brain';
 import clone from '@ouroboros/clone';
-import { afindi, arrayFindDelete, merge } from '@ouroboros/tools';
+import { afindi, arrayFindDelete, empty, merge } from '@ouroboros/tools';
 
 // NPM modules
 import PropTypes from 'prop-types';
@@ -142,8 +142,8 @@ export default function Permissions(props: PermissionsProps) {
 		// Clone the current values
 		const dPermissions = clone(permissions);
 
-		// If we got null, remove all rights
-		if(val === null) {
+		// If we got null, or an empty object, remove all rights
+		if(empty(val)) {
 			delete dPermissions[tab].rights[name];
 		}
 

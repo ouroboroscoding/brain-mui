@@ -11,7 +11,7 @@
 		"types": ["react", "node"],
 		"moduleResolution": "node",
 		"noEmit": false,
-		"outDir": "build",
+		"outDir": "lib",
 		"resolveJsonModule": true,
 		"strict": true,
 		"strictPropertyInitialization": false,
