@@ -1,12 +1,12 @@
 {
 	"name": "@ouroboros/brain-mui",
-	"version": "1.2.4",
+	"version": "2.2.0",
 	"description": "Components for use with the Brain service",
-	"main": "src/index.js",
-	"types": "src/index.d.ts",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"scripts": {
 		"build": "tslint -p tsconfig.json && tsc",
-		"clean": "cd src; find . -type f -name \"*.js\" -delete; find . -type f -name \"*.d.ts\" -delete",
+		"clean": "rm -Rf lib/*",
 		"for_local": "npm install; tslint -p tsconfig.json && tsc; rm -Rf node_modules",
 		"test": "echo \"Error: no test specified.\" && exit 1"
 	},
@@ -34,12 +34,11 @@
 		"typescript": "^4.8.3"
 	},
 	"dependencies": {
-		"@ouroboros/brain": "^1.2.2",
-		"@ouroboros/brain-react": "^1.0.2",
-		"@ouroboros/clone": "^1.0.1",
-		"@ouroboros/define": "^1.0.3",
-		"@ouroboros/define-mui": "^1.4.1",
-		"@ouroboros/tools": "^0.5.1",
+		"@ouroboros/brain-react": "^2.2.0",
+		"@ouroboros/clone": "^1.1.0",
+		"@ouroboros/define": "^1.1.2",
+		"@ouroboros/define-mui": "^1.5.5",
+		"@ouroboros/tools": "^0.6.5",
 		"prop-types": "^15.8.1",
 		"uuid": "^9.0.0"
 	},
@@ -47,8 +46,9 @@
 		"@emotion/react": "^11.8.2",
 		"@emotion/styled": "^11.8.1",
 		"@mui/material": "^5.5.1",
-		"@ouroboros/body": "^1.0.3",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"@ouroboros/body": "^1.1.2",
+		"@ouroboros/brain": "^2.2.0",
+		"react": "^17.0.2 || ^18.0.0",
+		"react-dom": "^17.0.2 || ^18.0.0"
 	}
 }

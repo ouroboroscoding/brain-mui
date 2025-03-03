@@ -13,26 +13,15 @@ export type PermissionsProps = {
     ids?: Record<string, string>;
     onClose: () => void;
     onUpdate?: () => void;
-    portals: PortalStruct[];
+    portals: Record<string, string>;
     sections: SectionStruct[];
     value: Record<string, Record<string, number>>;
 };
-export type PermissionsRecord = {
-    _created?: number;
-    _updated?: number;
-    user: string;
-    portal: string;
-    title: string;
-    rights: Record<string, Record<string, number>>;
-};
+export type PermissionsRecord = Record<string, Record<string, number>>;
 export type PermissionStruct = {
     name: string;
     title: string;
     allowed: number;
-};
-export type PortalStruct = {
-    key: string | null;
-    title: string;
 };
 export type SectionStruct = {
     title: string;
@@ -56,10 +45,7 @@ declare namespace Permissions {
         }>;
         onClose: PropTypes.Validator<(...args: any[]) => any>;
         onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
-        portals: PropTypes.Validator<(Required<PropTypes.InferProps<{
-            key: PropTypes.Requireable<string>;
-            title: PropTypes.Validator<string>;
-        }>> | null | undefined)[]>;
+        portals: PropTypes.Validator<object>;
         sections: PropTypes.Validator<(Required<PropTypes.InferProps<{
             title: PropTypes.Validator<string>;
             rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{
