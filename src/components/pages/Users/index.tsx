@@ -39,13 +39,13 @@ import Permissions from './Permissions';
 
 // Types
 import { actionStruct } from '@ouroboros/define-mui/src/Results/Row';
-import { PortalStruct, SectionStruct } from './Permissions';
+import { SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
 	allowedPermissions: SectionStruct[],
 	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: (type: string, data?: any) => void,
-	portals: PortalStruct[]
+	portals: Record<string, string>
 }
 
 // Constants
@@ -319,13 +319,10 @@ Users.propTypes = {
 	})).isRequired,
 	onError: PropTypes.func,
 	onSuccess: PropTypes.func,
-	portals: PropTypes.arrayOf(PropTypes.exact({
-		key: PropTypes.string,
-		title: PropTypes.string.isRequired
-	}))
+	portals: PropTypes.object
 }
 
 // Default props
 Users.defaultProps = {
-	portals: [ { key: '', title: 'Default' } ]
+	portals: { '': 'Default' }
 }

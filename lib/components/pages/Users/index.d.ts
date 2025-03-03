@@ -8,13 +8,13 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
-import { PortalStruct, SectionStruct } from './Permissions';
+import { SectionStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
     allowedPermissions: SectionStruct[];
     onError?: (error: responseErrorStruct) => void;
     onSuccess?: (type: string, data?: any) => void;
-    portals: PortalStruct[];
+    portals: Record<string, string>;
 };
 /**
  * Users
@@ -39,16 +39,12 @@ declare namespace Users {
         }>> | null | undefined)[]>;
         onError: PropTypes.Requireable<(...args: any[]) => any>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
-        portals: PropTypes.Requireable<(Required<PropTypes.InferProps<{
-            key: PropTypes.Requireable<string>;
-            title: PropTypes.Validator<string>;
-        }>> | null | undefined)[]>;
+        portals: PropTypes.Requireable<object>;
     };
     var defaultProps: {
         portals: {
-            key: string;
-            title: string;
-        }[];
+            '': string;
+        };
     };
 }
 export default Users;
