@@ -191,8 +191,8 @@ export default function Permissions(props: PermissionsProps) {
 
 		// Update the permissions
 		brain.update('permissions', {
-			_user: props.value._id,
-			_portal: portals[tab],
+			user: props.value._id,
+			portal: portals[tab],
 			rights: permissions[portals[tab]]
 		}).then((data: boolean) => {
 			if(data) {
