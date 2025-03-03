@@ -132,7 +132,7 @@ export default function Permissions(props: PermissionsProps) {
 		const dPermissions = clone(permissions);
 
 		// If we got null, remove all rights
-		if(val === null) {
+		if(empty(val)) {
 			delete dPermissions[portals[tab]][name];
 		}
 
