@@ -8,11 +8,10 @@
  */
 
 // Ouroboros modules
-import brain, { errors } from '@ouroboros/brain';
+import brain, { errors, RIGHTS } from '@ouroboros/brain';
 import { useRights } from '@ouroboros/brain-react';
-import clone from '@ouroboros/clone';
 import { Results, Search } from '@ouroboros/define-mui';
-import { afindi, merge } from '@ouroboros/tools';
+import { arrayFindMerge } from '@ouroboros/tools';
 
 // NPM modules
 import PropTypes from 'prop-types';
@@ -39,13 +38,12 @@ import Permissions from './Permissions';
 
 // Types
 import { actionStruct } from '@ouroboros/define-mui/src/Results/Row';
-import { SectionStruct } from './Permissions';
+import { PortalsStruct } from './Permissions';
 import { responseErrorStruct } from '@ouroboros/body';
 export type UsersProps = {
-	allowedPermissions: SectionStruct[],
 	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: (type: string, data?: any) => void,
-	portals: Record<string, string>
+	portals: PortalsStruct
 }
 
 // Constants
@@ -62,12 +60,27 @@ const SETUP_URL = 'https://' + window.location.host + '/setup/{key}';
  * @param props Properties passed to the component
  * @returns React.Component
  */
-export default function Users(props: UsersProps) {
+export default function Users({
+	onError,
+	onSuccess,
+	portals = { '': {
+		title: 'Default',
+		permissions: [ { title: 'Authorization', rights: [ {
+			name: 'brain_user',
+			title: 'Users',
+			allowed: RIGHTS.CREATE | RIGHTS.READ | RIGHTS.UPDATE
+		}, {
+			name: 'brain_permission',
+			title: 'Permissions',
+			allowed: RIGHTS.READ | RIGHTS.UPDATE
+		} ] } ]
+	} }
+}: UsersProps) {
 
 	// State
-	const [createForm, createFormSet] = useState<boolean>(false);
-	const [password, passwordSet] = useState<string | false>(false);
-	const [records, recordsSet] = useState<any[]>([]);
+	const [ createForm, createFormSet ] = useState<boolean>(false);
+	const [ password, passwordSet ] = useState<string | false>(false);
+	const [ records, recordsSet ] = useState<any[]>([]);
 
 	// Hooks
 	const rightsPermission = useRights('brain_permission');
@@ -99,7 +112,7 @@ export default function Users(props: UsersProps) {
 			passwordSet(false);
 		}
 
-	}, [rightsUser]);
+	}, [ rightsUser ]);
 
 	// Called to update the user's password
 	function passwordUpdate() {
@@ -115,8 +128,8 @@ export default function Users(props: UsersProps) {
 			new_passwd: refPasswd.current.value
 		}).then((data: boolean) => {
 			if(data) {
-				if(props.onSuccess) {
-					props.onSuccess('password');
+				if(onSuccess) {
+					onSuccess('password');
 				}
 				passwordSet(false);
 			}
@@ -139,21 +152,13 @@ export default function Users(props: UsersProps) {
 				if(data) {
 
 					// If we have an onSuccess prop
-					if(props.onSuccess) {
-						props.onSuccess('update', user);
+					if(onSuccess) {
+						onSuccess('update', user);
 					}
 
-					// Look for the record
-					const i = afindi(records, '_id', user._id);
-
-					// If it exists
-					if(i > -1) {
-
-						// Clone the records, update the index, and set the new records
-						const lUsers = clone(records);
-						merge(lUsers[i], user);
-						recordsSet(lUsers);
-					}
+					// Update the records
+					recordsSet(l =>
+						arrayFindMerge(l, '_id', user._id, user, true) as any);
 				}
 
 				// Resolve
@@ -163,8 +168,8 @@ export default function Users(props: UsersProps) {
 				if(error.code === errors.body.DATA_FIELDS) {
 					reject(error.msg);
 				} else {
-					if(props.onError) {
-						props.onError(error);
+					if(onError) {
+						onError(error);
 					} else {
 						throw new Error(JSON.stringify(error));
 					}
@@ -187,18 +192,18 @@ export default function Users(props: UsersProps) {
 					url: SETUP_URL
 				}).then(data => {
 					if(data) {
-						if(props.onSuccess) {
-							props.onSuccess('setup_sent');
+						if(onSuccess) {
+							onSuccess('setup_sent');
 						}
 					}
 				}, (error: responseErrorStruct) => {
 					if(error.code === errors.body.ALREADY_DONE) {
-						if(props.onSuccess) {
-							props.onSuccess('setup_done');
+						if(onSuccess) {
+							onSuccess('setup_done');
 						}
 					} else {
-						if(props.onError) {
-							props.onError(error);
+						if(onError) {
+							onError(error);
 						} else {
 							throw new Error(JSON.stringify(error));
 						}
@@ -216,12 +221,11 @@ export default function Users(props: UsersProps) {
 			component: Permissions as unknown as React.FunctionComponent<{ onClose: () => void; value: Record<string, any>; }>,
 			props: {
 				onUpdate: () => {
-					if(props.onSuccess) {
-						props.onSuccess('permissions');
+					if(onSuccess) {
+						onSuccess('permissions');
 					}
 				},
-				portals: props.portals,
-				sections: props.allowedPermissions
+				portals
 			}
 		});
 	}
@@ -254,7 +258,7 @@ export default function Users(props: UsersProps) {
 				<Paper className="padding">
 					<UserCreate
 						onCancel={() => createFormSet(false)}
-						onError={props.onError}
+						onError={onError}
 						onSuccess={(user: any) => {
 							createFormSet(false);
 							recordsSet([user]);
@@ -309,20 +313,17 @@ export default function Users(props: UsersProps) {
 
 // Valid props
 Users.propTypes = {
-	allowedPermissions: PropTypes.arrayOf(PropTypes.exact({
-		title: PropTypes.string.isRequired,
-		rights: PropTypes.arrayOf(PropTypes.exact({
-			name: PropTypes.string.isRequired,
-			title: PropTypes.string.isRequired,
-			allowed: PropTypes.number.isRequired
-		}))
-	})).isRequired,
 	onError: PropTypes.func,
 	onSuccess: PropTypes.func,
-	portals: PropTypes.object
-}
-
-// Default props
-Users.defaultProps = {
-	portals: { '': 'Default' }
+	portals: PropTypes.objectOf(PropTypes.exact({
+		title: PropTypes.string.isRequired,
+		permissions: PropTypes.arrayOf(PropTypes.exact({
+			title: PropTypes.string.isRequired,
+			rights: PropTypes.arrayOf(PropTypes.exact({
+				name: PropTypes.string.isRequired,
+				title: PropTypes.string.isRequired,
+				allowed: PropTypes.number.isRequired
+			}))
+		})).isRequired
+	}) )
 }
