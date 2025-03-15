@@ -9,9 +9,7 @@
  */
 
 // Ouroboros modules
-import { RIGHTS } from '@ouroboros/brain';
-import clone from '@ouroboros/clone';
-import { omap } from '@ouroboros/tools';
+import { omap, owithout } from '@ouroboros/tools';
 
 // NPM modules
 import PropTypes from 'prop-types';
@@ -49,7 +47,7 @@ export type PermissionProps = {
 export default function Permission(props: PermissionProps) {
 
 	// State
-	const [add, addSet] = useState<boolean>(false);
+	const [ add, addSet ] = useState<boolean>(false);
 
 	// Called when a new ID is to be added
 	function idAdded(id: string, rights: number) {
@@ -60,7 +58,7 @@ export default function Permission(props: PermissionProps) {
 		}
 
 		// Clone the current rights
-		const oRights = clone(props.value);
+		const oRights = { ...props.value };
 
 		// Add the record
 		oRights[id] = rights;
@@ -75,14 +73,8 @@ export default function Permission(props: PermissionProps) {
 	// Called when any rights are changed
 	function idChanged(id: string, rights: number) {
 
-		// Clone the current rights
-		const oRights = clone(props.value);
-
-		// Add or update the existing rights
-		oRights[id] = rights;
-
 		// Let the parent know
-		props.onChange(props.name, oRights);
+		props.onChange(props.name, { ...props.value, [id]: rights });
 	}
 
 	// Called to drop a right completely
@@ -91,14 +83,8 @@ export default function Permission(props: PermissionProps) {
 		// If the ID exists
 		if(id in props.value) {
 
-			// Clone the current rights
-			const oRights = clone(props.value);
-
-			// Drop the right
-			delete oRights[id];
-
 			// Let the parent know
-			props.onChange(props.name, oRights);
+			props.onChange(props.name, owithout(props.value, id));
 		}
 	}
 
