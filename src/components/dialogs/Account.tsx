@@ -11,7 +11,7 @@
 import { errors as bodyErrors } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
 import { useUser, update } from '@ouroboros/brain-react';
-import UserDef from '@ouroboros/brain/definitions/user.json';
+import UserDef from '@ouroboros/brain/define/user.json';
 import { Tree } from '@ouroboros/define';
 import { Form } from '@ouroboros/define-mui';
 
