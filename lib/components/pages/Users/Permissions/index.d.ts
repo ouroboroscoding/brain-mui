@@ -13,26 +13,20 @@ export type PermissionsProps = {
     ids?: Record<string, string>;
     onClose: () => void;
     onUpdate?: () => void;
-    portals: PortalStruct[];
-    sections: SectionStruct[];
+    portals: PortalsStruct;
     value: Record<string, Record<string, number>>;
 };
-export type PermissionsRecord = {
-    _created?: number;
-    _updated?: number;
-    user: string;
-    portal: string;
-    title: string;
-    rights: Record<string, Record<string, number>>;
-};
+export type PermissionsRecord = Record<string, Record<string, number>>;
 export type PermissionStruct = {
     name: string;
     title: string;
     allowed: number;
 };
-export type PortalStruct = {
-    key: string | null;
-    title: string;
+export type PortalsStruct = {
+    [x: string]: {
+        title: string;
+        permissions: SectionStruct[];
+    };
 };
 export type SectionStruct = {
     title: string;
@@ -48,7 +42,7 @@ export type SectionStruct = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-declare function Permissions(props: PermissionsProps): React.JSX.Element;
+declare function Permissions({ ids, onClose, onUpdate, portals, value }: PermissionsProps): React.JSX.Element;
 declare namespace Permissions {
     var propTypes: {
         ids: PropTypes.Requireable<{
@@ -56,18 +50,19 @@ declare namespace Permissions {
         }>;
         onClose: PropTypes.Validator<(...args: any[]) => any>;
         onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
-        portals: PropTypes.Validator<(Required<PropTypes.InferProps<{
-            key: PropTypes.Requireable<string>;
-            title: PropTypes.Validator<string>;
-        }>> | null | undefined)[]>;
-        sections: PropTypes.Validator<(Required<PropTypes.InferProps<{
-            title: PropTypes.Validator<string>;
-            rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{
-                name: PropTypes.Validator<string>;
+        portals: PropTypes.Validator<{
+            [x: string]: Required<PropTypes.InferProps<{
                 title: PropTypes.Validator<string>;
-                allowed: PropTypes.Validator<number>;
-            }>> | null | undefined)[]>;
-        }>> | null | undefined)[]>;
+                permissions: PropTypes.Validator<(Required<PropTypes.InferProps<{
+                    title: PropTypes.Validator<string>;
+                    rights: PropTypes.Requireable<(Required<PropTypes.InferProps<{
+                        name: PropTypes.Validator<string>;
+                        title: PropTypes.Validator<string>;
+                        allowed: PropTypes.Validator<number>;
+                    }>> | null | undefined)[]>;
+                }>> | null | undefined)[]>;
+            }>> | null | undefined;
+        }>;
         value: PropTypes.Requireable<PropTypes.InferProps<{
             _id: PropTypes.Validator<string>;
         }>>;

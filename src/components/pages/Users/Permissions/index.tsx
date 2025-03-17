@@ -10,8 +10,7 @@
 
 // Ouroboros modules
 import brain, { RIGHTS_ALL_ID } from '@ouroboros/brain';
-import clone from '@ouroboros/clone';
-import { afindi, arrayFindDelete, empty, merge } from '@ouroboros/tools';
+import { empty, merge, omap } from '@ouroboros/tools';
 
 // NPM modules
 import PropTypes from 'prop-types';
@@ -35,30 +34,24 @@ export type PermissionsProps = {
 	ids?: Record<string, string>,
 	onClose: () => void,
 	onUpdate?: () => void,
-	portals: PortalStruct[],
-	sections: SectionStruct[],
+	portals: PortalsStruct,
 	value: Record<string, Record<string, number>>
 }
-export type PermissionsRecord = {
-	_created?: number,
-	_updated?: number,
-	user: string,
-	portal: string,
-	title: string,
-	rights: Record<string, Record<string, number>>
-}
+export type PermissionsRecord = Record<string, Record<string, number>>
 export type PermissionStruct = {
 	name: string,
 	title: string,
 	allowed: number
 }
-export type PortalStruct = {
-	key: string | null,
-	title: string
-}
+export type PortalsStruct = {
+	[x: string]: {
+		title: string,
+		permissions: SectionStruct[]
+	}
+};
 type portalMenuStruct = {
 	element: any,
-	items: PortalStruct[]
+	items: string[]
 }
 export type SectionStruct = {
 	title: string,
@@ -75,13 +68,16 @@ export type SectionStruct = {
  * @param Object props Properties passed to the component
  * @returns React.Component
  */
-export default function Permissions(props: PermissionsProps) {
+export default function Permissions(
+	{ ids, onClose, onUpdate, portals, value }: PermissionsProps
+) {
 
 	// State
-	const [permissions, permissionsSet] = useState<PermissionsRecord[]>([]);
-	const [tab, tabSet] = useState<number>(-1);
-	const [portalMenu, portalMenuSet] = useState<portalMenuStruct | false>(false);
-	const [remaining, remainingSet] = useState<PortalStruct[]>([]);
+	const [ permissions, permissionsSet ] = useState<Record<string, PermissionsRecord>>({ });
+	const [ tab, tabSet ] = useState<number | false>(false);
+	const [ tabs, tabsSet ] = useState<string[]>([ ]);
+	const [ portalMenu, portalMenuSet ] = useState<portalMenuStruct | false>(false);
+	const [ remaining, remainingSet ] = useState<string[]>([ ]);
 
 	// Refs
 	const labelsRef = useRef({ [RIGHTS_ALL_ID]: '*' });
@@ -89,18 +85,14 @@ export default function Permissions(props: PermissionsProps) {
 	// Load effect
 	useEffect(() => {
 		brain.read('permissions', {
-			user: props.value._id
+			user: value._id
 		}).then(data => {
-			for(const o of data) {
-				const i = afindi(props.portals, 'key', o.portal);
-				o.title = i > -1 ? props.portals[i].title : 'UNKNOWN';
-			}
 			permissionsSet(data);
-			if(permissions.length > 0) {
+			if(!empty(permissions)) {
 				tabSet(0);
 			}
 		});
-	}, [props.value]);
+	}, [ value ]);
 
 	// IDs effect
 	useEffect(() => {
@@ -109,47 +101,53 @@ export default function Permissions(props: PermissionsProps) {
 		const oIDs = { [RIGHTS_ALL_ID]: '*' };
 
 		// If we have IDs
-		if(props.ids && props.ids.length) {
-			merge(oIDs, props.ids);
+		if(ids && ids.length) {
+			merge(oIDs, ids);
 		}
 
 		// Store the new ref
 		labelsRef.current = oIDs;
 
-	}, [props.ids]);
+	}, [ ids ]);
 
-	// Remaining effect
+	// Portals / permissions effect
 	useEffect(() => {
 
-		// Copy the possible portals
-		const lPortals: PortalStruct[] = clone(props.portals);
+		// Init the list of actual keys, and possible keys
+		const aTabs: string[] = [];
+		const aRemaining: string[] = [];
 
-		// Go through each passed permission
-		for(const o of permissions) {
+		// Go through each possible permission
+		for(const sPortal of Object.keys(portals)) {
 
-			// Remove it from the remaining
-			arrayFindDelete(lPortals, 'key', o.portal);
+			// If we have the permission
+			if(sPortal in permissions) {
+				aTabs.push(sPortal);
+			} else {
+				aRemaining.push(sPortal);
+			}
 		}
 
-		// Store the new remaining
-		remainingSet(lPortals);
+		// Store the new tabs and remaining
+		tabsSet(aTabs);
+		remainingSet(aRemaining);
 
-	}, [props.portals, permissions])
+	}, [ portals, permissions ])
 
 	// Called when any permission is changed
 	function change(name: string, val: Record<string, number> | null) {
 
 		// Clone the current values
-		const dPermissions = clone(permissions);
+		const dPermissions = { ...permissions };
 
-		// If we got null, or an empty object, remove all rights
+		// If we got null, remove all rights
 		if(empty(val)) {
-			delete dPermissions[tab].rights[name];
+			delete dPermissions[tabs[tab as number]][name];
 		}
 
 		// Else, update / add the rights
 		else {
-			dPermissions[tab].rights[name] = val;
+			dPermissions[tabs[tab as number]][name] = val as Record<string, number>;
 		}
 
 		// Update the state
@@ -157,27 +155,26 @@ export default function Permissions(props: PermissionsProps) {
 	}
 
 	// Called to add a portal to the permissions
-	function portalAdd(portal: PortalStruct) {
+	function portalAdd(portal: string) {
 
 		// Get the current length of the permissions
-		const iLength = permissions.length;
+		const iLength = Object.keys(permissions).length;
 
 		// Add the portal to the data
-		permissionsSet((val: PermissionsRecord[]) => {
-			const lPerms = clone(val);
-			lPerms.push({
-				portal: portal.key,
-				rights: {},
-				title: portal.title
-			});
-			return lPerms;
+		permissionsSet((val: Record<string, PermissionsRecord>) => {
+			return { ...val, [portal]: {} } as Record<string, PermissionsRecord>;
 		});
 
 		// Remove the portal from the remaining
-		remainingSet((val: PortalStruct[]) => {
-			return (
-				arrayFindDelete(val, 'key', portal.key, true) as PortalStruct[]
-			);
+		remainingSet((val: string[]) => {
+			const i = val.indexOf(portal);
+			if(i !== -1) {
+				const l = [ ...val ];
+				l.splice(i, 1);
+				return l;
+			} else {
+				return val;
+			}
 		});
 
 		// Set the new tab
@@ -194,7 +191,7 @@ export default function Permissions(props: PermissionsProps) {
 		// Set the menu
 		portalMenuSet({
 			element: ev.target,
-			items: clone(remaining)
+			items: [ ...remaining ]
 		});
 	}
 
@@ -203,15 +200,15 @@ export default function Permissions(props: PermissionsProps) {
 
 		// Update the permissions
 		brain.update('permissions', {
-			user: props.value._id,
-			portal: permissions[tab].portal,
-			rights: permissions[tab].rights
+			user: value._id,
+			portal: tabs[tab as number],
+			rights: permissions[tabs[tab as number]]
 		}).then((data: boolean) => {
 			if(data) {
-				if(props.onUpdate) {
-					props.onUpdate();
+				if(onUpdate) {
+					onUpdate();
 				}
-				props.onClose();
+				onClose();
 			}
 		});
 	}
@@ -220,19 +217,19 @@ export default function Permissions(props: PermissionsProps) {
 	return (
 		<React.Fragment>
 			<Tabs
-				onChange={(ev: React.SyntheticEvent, portal: number) => {
-					if(portal !== permissions.length) {
-						tabSet(portal);
+				onChange={(ev: React.SyntheticEvent, i: number) => {
+					if(i !== Object.keys(permissions).length) {
+						tabSet(i);
 					}
 				}}
 				scrollButtons="auto"
 				value={tab}
 				variant="scrollable"
 			>
-				{permissions.map(o =>
-					<Tab key={o.portal} label={o.title} />
-				)}
-				{remaining.length > 0 &&
+				{omap(permissions, ((o, p) =>
+					<Tab key={p} label={portals[p].title} />
+				))}
+				{!empty(remaining) &&
 					<Tab icon={<i className="fa-solid fa-plus" />} onClick={portalAddMenu} />
 				}
 			</Tabs>
@@ -242,17 +239,17 @@ export default function Permissions(props: PermissionsProps) {
 					open={true}
 					onClose={() => portalMenuSet(false)}
 				>
-					{portalMenu.items.map(o =>
-						<MenuItem key={o.key} onClick={() => {
+					{portalMenu.items.map(s =>
+						<MenuItem key={s} onClick={() => {
 							portalMenuSet(false);
-							portalAdd(o);
+							portalAdd(s);
 						}}>
-							{o.title}
+							{portals[s].title}
 						</MenuItem>
 					)}
 				</Menu>
 			}
-			{tab > -1 && props.sections.map(section =>
+			{tab !== false && portals[tabs[tab]].permissions.map(section =>
 				<Paper key={section.title} className="permissions">
 					<Grid container spacing={0}>
 						<Grid item xs={12} md={6} className="group_title">{section.title}</Grid>
@@ -270,8 +267,8 @@ export default function Permissions(props: PermissionsProps) {
 								onChange={change}
 								title={perm.title}
 								value={(permissions &&
-										permissions[tab] &&
-										permissions[tab].rights[perm.name]
+									permissions[tabs[tab]] &&
+									permissions[tabs[tab]][perm.name]
 								) || {}}
 							/>
 						)}
@@ -280,7 +277,7 @@ export default function Permissions(props: PermissionsProps) {
 				</Paper>
 			)}
 			<Box className="actions">
-				<Button variant="contained" color="secondary" onClick={props.onClose}>Cancel</Button>
+				<Button variant="contained" color="secondary" onClick={onClose}>Cancel</Button>
 				<Button variant="contained" color="primary" onClick={update}>Update</Button>
 			</Box>
 		</React.Fragment>
@@ -292,17 +289,16 @@ Permissions.propTypes = {
 	ids: PropTypes.objectOf(PropTypes.string),
 	onClose: PropTypes.func.isRequired,
 	onUpdate: PropTypes.func,
-	portals: PropTypes.arrayOf(PropTypes.exact({
-		key: PropTypes.string,
-		title: PropTypes.string.isRequired
-	})).isRequired,
-	sections: PropTypes.arrayOf(PropTypes.exact({
+	portals: PropTypes.objectOf(PropTypes.exact({
 		title: PropTypes.string.isRequired,
-		rights: PropTypes.arrayOf(PropTypes.exact({
-			name: PropTypes.string.isRequired,
+		permissions: PropTypes.arrayOf(PropTypes.exact({
 			title: PropTypes.string.isRequired,
-			allowed: PropTypes.number.isRequired
-		}))
+			rights: PropTypes.arrayOf(PropTypes.exact({
+				name: PropTypes.string.isRequired,
+				title: PropTypes.string.isRequired,
+				allowed: PropTypes.number.isRequired
+			}))
+		})).isRequired
 	})).isRequired,
 	value: PropTypes.shape({
 		_id: PropTypes.string.isRequired
