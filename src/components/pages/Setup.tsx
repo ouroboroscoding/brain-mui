@@ -65,7 +65,6 @@ const UserParent = new Parent(UserDef, {
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
 export type SetupProps = {
-	mobile: boolean,
 	onSuccess?: () => void,
 	setupKey: string
 }
@@ -235,7 +234,6 @@ export default function Setup(props: SetupProps) {
 
 // Valid props
 Setup.propTypes = {
-	mobile: PropTypes.bool.isRequired,
 	onSuccess: PropTypes.func,
 	setupKey: PropTypes.string.isRequired
 }

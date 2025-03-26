@@ -22,7 +22,6 @@ import Typography from '@mui/material/Typography';
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
 export type VerificationProps = {
-	mobile: boolean,
 	onSuccess: () => void,
 	verificationKey: string
 }
@@ -87,7 +86,6 @@ export default function Verification(props: VerificationProps) {
 
 // Valid props
 Verification.propTypes = {
-	mobile: PropTypes.bool.isRequired,
 	onSuccess: PropTypes.func,
 	verificationKey: PropTypes.string.isRequired
 }

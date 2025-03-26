@@ -20,7 +20,7 @@ import { responseErrorStruct } from '@ouroboros/body';
 export type UserCreateProps = {
 	onError?: (error: responseErrorStruct) => void,
 	onCancel?: () => void,
-	onSuccess?: (type: string, data?: any) => void,
+	onSuccess?: (data: any) => void,
 	setupUrl: string
 }
 
@@ -54,15 +54,10 @@ export default function UserCreate(props: UserCreateProps) {
 				// If we were successful
 				if(data) {
 
-					// If we have an onSuccess prop
-					if(props.onSuccess) {
-						props.onSuccess('create', user);
-					}
-
 					// Add the ID to the user
 					user._id = data;
 
-					// Call success
+					// If we have an onSuccess prop
 					if(props.onSuccess) {
 						props.onSuccess(user);
 					}

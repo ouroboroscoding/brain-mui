@@ -12,7 +12,7 @@ import { responseErrorStruct } from '@ouroboros/body';
 export type UserCreateProps = {
     onError?: (error: responseErrorStruct) => void;
     onCancel?: () => void;
-    onSuccess?: (type: string, data?: any) => void;
+    onSuccess?: (data: any) => void;
     setupUrl: string;
 };
 /**
