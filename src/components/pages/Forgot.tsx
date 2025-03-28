@@ -10,7 +10,7 @@
 // Ouroboros modules
 import brain, { errors } from '@ouroboros/brain';
 import { Parent } from '@ouroboros/define';
-import { DefineParent, errorTree } from '@ouroboros/define-mui';
+import { DefineParent } from '@ouroboros/define-mui';
 
 // NPM modules
 import PropTypes from 'prop-types';
@@ -56,9 +56,8 @@ const PasswdParent = new Parent({
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
 export type ForgotProps = {
-	mobile: boolean,
-	onSuccess?: () => void,
 	forgotKey: string
+	onSuccess?: () => void
 }
 
 /**
@@ -177,7 +176,6 @@ export default function Forgot(props: ForgotProps) {
 
 // Valid props
 Forgot.propTypes = {
-	mobile: PropTypes.bool.isRequired,
-	onSuccess: PropTypes.func,
-	forgotKey: PropTypes.string.isRequired
+	forgotKey: PropTypes.string.isRequired,
+	onSuccess: PropTypes.func
 }
