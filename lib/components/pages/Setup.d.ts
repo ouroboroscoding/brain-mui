@@ -9,7 +9,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 export type SetupProps = {
-    mobile: boolean;
     onSuccess?: () => void;
     setupKey: string;
 };
@@ -26,7 +25,6 @@ export type SetupProps = {
 declare function Setup(props: SetupProps): React.JSX.Element;
 declare namespace Setup {
     var propTypes: {
-        mobile: PropTypes.Validator<boolean>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         setupKey: PropTypes.Validator<string>;
     };

@@ -9,7 +9,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 export type VerificationProps = {
-    mobile: boolean;
     onSuccess: () => void;
     verificationKey: string;
 };
@@ -26,7 +25,6 @@ export type VerificationProps = {
 declare function Verification(props: VerificationProps): React.JSX.Element;
 declare namespace Verification {
     var propTypes: {
-        mobile: PropTypes.Validator<boolean>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         verificationKey: PropTypes.Validator<string>;
     };

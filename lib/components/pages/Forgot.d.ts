@@ -9,9 +9,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 export type ForgotProps = {
-    mobile: boolean;
-    onSuccess?: () => void;
     forgotKey: string;
+    onSuccess?: () => void;
 };
 /**
  * Forgot
@@ -26,9 +25,8 @@ export type ForgotProps = {
 declare function Forgot(props: ForgotProps): React.JSX.Element;
 declare namespace Forgot {
     var propTypes: {
-        mobile: PropTypes.Validator<boolean>;
-        onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         forgotKey: PropTypes.Validator<string>;
+        onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
     };
 }
 export default Forgot;

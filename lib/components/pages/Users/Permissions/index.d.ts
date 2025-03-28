@@ -23,7 +23,7 @@ export type PermissionStruct = {
     allowed: number;
 };
 export type PortalsStruct = {
-    [x: string]: {
+    [portal: string]: {
         title: string;
         permissions: SectionStruct[];
     };
