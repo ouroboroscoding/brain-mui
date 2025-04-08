@@ -1,5 +1,8 @@
 # @ouroboros/brain-mui releases
 
+## 2.3.4
+- Fixed a bug that caused a crash when adding a new portal to a user's permissions.
+
 ## 2.3.3
 - Removed the `mobile` prop from all components as it wasn't used at all.
 - Fixed a bug in `UserCreate` where the `onSuccess` prop was called twice.
