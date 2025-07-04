@@ -74,7 +74,7 @@ export default function Permissions(
 
 	// State
 	const [ permissions, permissionsSet ] = useState<Record<string, PermissionsRecord>>({ });
-	const [ tab, tabSet ] = useState<number | false>(false);
+	const [ tab, tabSet ] = useState<string | false>(false);
 	const [ tabs, tabsSet ] = useState<string[]>([ ]);
 	const [ portalMenu, portalMenuSet ] = useState<portalMenuStruct | false>(false);
 	const [ remaining, remainingSet ] = useState<string[]>([ ]);
@@ -89,7 +89,7 @@ export default function Permissions(
 		}).then(data => {
 			permissionsSet(data);
 			if(!empty(permissions)) {
-				tabSet(0);
+				tabSet(Object.keys(permissions)[0]);
 			}
 		});
 	}, [ value ]);
@@ -142,12 +142,12 @@ export default function Permissions(
 
 		// If we got null, remove all rights
 		if(empty(val)) {
-			delete dPermissions[tabs[tab as number]][name];
+			delete dPermissions[tab as string][name];
 		}
 
 		// Else, update / add the rights
 		else {
-			dPermissions[tabs[tab as number]][name] = val as Record<string, number>;
+			dPermissions[tab as string][name] = val as Record<string, number>;
 		}
 
 		// Update the state
@@ -165,20 +165,8 @@ export default function Permissions(
 			return { ...val, [portal]: {} } as Record<string, PermissionsRecord>;
 		});
 
-		// Remove the portal from the remaining
-		remainingSet((val: string[]) => {
-			const i = val.indexOf(portal);
-			if(i !== -1) {
-				const l = [ ...val ];
-				l.splice(i, 1);
-				return l;
-			} else {
-				return val;
-			}
-		});
-
 		// Set the new tab
-		tabSet(iLength);
+		tabSet(portal);
 	}
 
 	// Called to display the menu to add a location to the order
@@ -201,8 +189,8 @@ export default function Permissions(
 		// Update the permissions
 		brain.update('permissions', {
 			user: value._id,
-			portal: tabs[tab as number],
-			rights: permissions[tabs[tab as number]]
+			portal: tab,
+			rights: permissions[tab as string]
 		}).then((data: boolean) => {
 			if(data) {
 				if(onUpdate) {
@@ -213,22 +201,26 @@ export default function Permissions(
 		});
 	}
 
+	// Tab
+	let tabIndex: number | false = tabs.indexOf(tab as string)
+	if(tabIndex < 0) { tabIndex = false }
+
 	// Render
 	return (
 		<React.Fragment>
 			<Tabs
 				onChange={(ev: React.SyntheticEvent, i: number) => {
 					if(i !== Object.keys(permissions).length) {
-						tabSet(i);
+						tabSet(tabs[i]);
 					}
 				}}
 				scrollButtons="auto"
-				value={tab}
+				value={tabIndex}
 				variant="scrollable"
 			>
-				{omap(permissions, ((o, p) =>
+				{tabs.map(p =>
 					<Tab key={p} label={portals[p].title} />
-				))}
+				)}
 				{!empty(remaining) &&
 					<Tab icon={<i className="fa-solid fa-plus" />} onClick={portalAddMenu} />
 				}
@@ -249,7 +241,7 @@ export default function Permissions(
 					)}
 				</Menu>
 			}
-			{tab !== false && portals[tabs[tab]].permissions.map(section =>
+			{tab !== false && portals[tab].permissions.map(section =>
 				<Paper key={section.title} className="permissions">
 					<Grid container spacing={0}>
 						<Grid item xs={12} md={6} className="group_title">{section.title}</Grid>
@@ -267,8 +259,8 @@ export default function Permissions(
 								onChange={change}
 								title={perm.title}
 								value={(permissions &&
-									permissions[tabs[tab]] &&
-									permissions[tabs[tab]][perm.name]
+									permissions[tab] &&
+									permissions[tab][perm.name]
 								) || {}}
 							/>
 						)}
