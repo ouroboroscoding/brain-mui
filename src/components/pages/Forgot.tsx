@@ -54,9 +54,10 @@ const PasswdParent = new Parent({
 });
 
 // Types
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type ForgotProps = {
 	forgotKey: string
+	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: () => void
 }
 
@@ -73,7 +74,7 @@ export type ForgotProps = {
 export default function Forgot(props: ForgotProps) {
 
 	// State
-	const [errorMsg, errorMsgSet] = useState<string | false>(false);
+	const [ errorMsg, errorMsgSet ] = useState<string | false>(false);
 
 	// Refs
 	const refPasswd = useRef<DefineParent>(null);
@@ -119,21 +120,29 @@ export default function Forgot(props: ForgotProps) {
 		brain.update('user/passwd/forgot', {
 			key: props.forgotKey,
 			passwd: oPasswd.passwd
-		}).then((data: boolean) => {
-			if(data) {
+		}).then((res: responseStruct) => {
+			
+			if(res.error) {
+				if(res.error.code === errors.body.DB_NO_RECORD) {
+					errorMsgSet('Invalid Key. Please make sure you copied the URL from your email correctly.');
+				} else if(res.error.code === errors.PASSWORD_STRENGTH) {
+					refPasswd.current?.error({
+						passwd: 'failed regex (custom)'
+					});
+				} else {
+					if(props.onError) {
+						props.onError(res.error);
+					} else {
+						throw new Error(JSON.stringify(res.error));
+					}
+				}
+				return;
+			}
+			
+			if(res.data) {
 				if(props.onSuccess) {
 					props.onSuccess();
 				}
-			}
-		}, (error: responseErrorStruct) => {
-			if(error.code === errors.body.DB_NO_RECORD) {
-				errorMsgSet('Invalid Key. Please make sure you copied the URL from your email correctly.');
-			} else if(error.code === errors.PASSWORD_STRENGTH) {
-				refPasswd.current?.error({
-					passwd: 'failed regex (custom)'
-				});
-			} else {
-				errorMsgSet(JSON.stringify(error, null, 4));
 			}
 		});
 	}
@@ -177,5 +186,6 @@ export default function Forgot(props: ForgotProps) {
 // Valid props
 Forgot.propTypes = {
 	forgotKey: PropTypes.string.isRequired,
+	onError: PropTypes.func,
 	onSuccess: PropTypes.func
 }

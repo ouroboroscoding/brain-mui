@@ -1,5 +1,8 @@
 # @ouroboros/brain-mui releases
 
+## 2.3.?
+- Updated `@ouroboros/body`, `@ouroboros/brain`, and `@ouroboros/brain-react` and changed code to reflect the changes without altering how this library works.
+
 ## 2.3.4
 - Fixed a bug that caused a crash when adding a new portal to a user's permissions.
 

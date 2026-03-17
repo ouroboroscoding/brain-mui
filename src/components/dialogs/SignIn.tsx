@@ -9,7 +9,7 @@
  */
 
 // Ouroboros modules
-import { errors as bodyErrors, responseErrorStruct } from '@ouroboros/body';
+import { errors as bodyErrors } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
 import { signin, signinReturn, useUser } from '@ouroboros/brain-react';
 import { errorTree } from '@ouroboros/define-mui';
@@ -29,6 +29,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 // Types
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type SignInProps = {
 	forgotUrl: string,
 	onError?: (error: responseErrorStruct) => void,
@@ -74,7 +75,25 @@ export default function SignIn(props: SignInProps) {
 		brain.create('user/passwd/forgot', {
 			email: emailRef.current.value,
 			url: props.forgotUrl
-		}).then((data: boolean) => {
+		}).then((res: responseStruct) => {
+
+			if(res.error) {
+
+				// If we got field errors
+				if(res.error.code === bodyErrors.DATA_FIELDS) {
+					fieldErrorsSet(errorTree(res.error.msg));
+				}
+
+				// Else, unknown error
+				else {
+					if(props.onError) {
+						props.onError(res.error);
+					} else {
+						throw new Error(JSON.stringify(res.error));
+					}
+				}
+				return;
+			}
 
 			// If we have an onForgot prop
 			if(props.onForgot) {
@@ -83,22 +102,6 @@ export default function SignIn(props: SignInProps) {
 
 			// Clear forgot
 			forgotSet(false);
-
-		}, (error: responseErrorStruct) => {
-
-			// If we got field errors
-			if(error.code === bodyErrors.DATA_FIELDS) {
-				fieldErrorsSet(errorTree(error.msg));
-			}
-
-			// Else, unknown error
-			else {
-				if(props.onError) {
-					props.onError(error);
-				} else {
-					throw new Error(JSON.stringify(error));
-				}
-			}
 		});
 	}
 

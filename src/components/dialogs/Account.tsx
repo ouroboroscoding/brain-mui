@@ -90,7 +90,7 @@ const UserTree = new Tree(UserDef, {
 });
 
 // Types
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseStruct, responseErrorStruct } from '@ouroboros/body';
 import { userType } from '@ouroboros/brain-react';
 export type AccountProps = {
 	onClose: () => void,
@@ -130,10 +130,39 @@ export default function Account(props: AccountProps) {
 			self.url = props.verificationUrl;
 
 			// Send the data to the server
-			brain.update('user/email', self).then((data: boolean) => {
+			brain.update('user/email', self).then((res: responseStruct) => {
+
+				if(res.error) {
+
+					// If we got field errors
+					if(res.error.code === bodyErrors.DATA_FIELDS) {
+						return reject(res.error.msg);
+					}
+
+					// Else, if the email is a duplicate of an existing account
+					else if(res.error.code === bodyErrors.DB_DUPLICATE) {
+						return reject([ [ 'email', 'Already in use' ] ]);
+					}
+
+					// Else, if the password passed is invalid for the current
+					//	account
+					else if(res.error.code === errors.SIGNIN_FAILED) {
+						return reject([ [ 'email_passwd', 'Invalid Password' ] ]);
+					}
+
+					// Else, unknown error
+					else {
+						if(props.onError) {
+							props.onError(res.error);
+							return reject([ ]);
+						} else {
+							throw new Error(JSON.stringify(res.error));
+						}
+					}
+				}
 
 				// If we were successful
-				if(data) {
+				if(res.data) {
 
 					// Fetch the latest user data
 					update();
@@ -150,34 +179,7 @@ export default function Account(props: AccountProps) {
 				}
 
 				// Resolve
-				resolve(data);
-
-			}, (error: responseErrorStruct) => {
-
-				// If we got field errors
-				if(error.code === bodyErrors.DATA_FIELDS) {
-					reject(error.msg);
-				}
-
-				// Else, if the email is a duplicate of an existing account
-				else if(error.code === bodyErrors.DB_DUPLICATE) {
-					reject([['email', 'Already in use']]);
-				}
-
-				// Else, if the password passed is invalid for the current
-				//	account
-				else if(error.code === errors.SIGNIN_FAILED) {
-					reject([['email_passwd', 'Invalid Password']]);
-				}
-
-				// Else, unknown error
-				else {
-					if(props.onError) {
-						props.onError(error);
-					} else {
-						throw new Error(JSON.stringify(error));
-					}
-				}
+				resolve(res.data);
 			});
 		});
 	}
@@ -197,10 +199,35 @@ export default function Account(props: AccountProps) {
 			delete self.confirm_passwd;
 
 			// Submit the new password
-			brain.update('user/passwd', self).then((data: boolean) => {
+			brain.update('user/passwd', self).then((res: responseStruct) => {
+
+				if(res.error) {
+
+					// If we got field errors
+					if(res.error.code === bodyErrors.DATA_FIELDS) {
+						return reject(res.error.msg);
+					}
+
+					// Else, if the new password isn't strong enough
+					else if(res.error.code === errors.PASSWORD_STRENGTH) {
+						return reject([ [ 'new_passwd', 'Not strong enough' ] ]);
+					}
+
+					// Else, unknown error
+					else {
+						if(props.onError) {
+							props.onError(res.error);
+							reject(res.error);
+						} else {
+							throw new Error(JSON.stringify(res.error));
+						}
+					}
+
+
+				}
 
 				// If we were successful
-				if(data) {
+				if(res.data) {
 
 					// If we have an onPasswdChanged prop
 					if(props.onPasswdChanged) {
@@ -214,28 +241,8 @@ export default function Account(props: AccountProps) {
 				}
 
 				// Resolve
-				resolve(data);
+				resolve(res.data);
 
-			}, (error: responseErrorStruct) => {
-
-				// If we got field errors
-				if(error.code === bodyErrors.DATA_FIELDS) {
-					reject(error.msg);
-				}
-
-				// Else, if the new password isn't strong enough
-				else if(error.code === errors.PASSWORD_STRENGTH) {
-					reject([['new_passwd', 'Not strong enough']]);
-				}
-
-				// Else, unknown error
-				else {
-					if(props.onError) {
-						props.onError(error);
-					} else {
-						throw new Error(JSON.stringify(error));
-					}
-				}
 			});
 		});
 	}

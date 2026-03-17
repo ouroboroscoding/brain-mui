@@ -7,10 +7,10 @@
  * @copyright Ouroboros Coding Inc.
  * @created 2023-01-17
  */
-import { responseErrorStruct } from '@ouroboros/body';
 import { signinReturn } from '@ouroboros/brain-react';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { responseErrorStruct } from '@ouroboros/body';
 export type SignInProps = {
     forgotUrl: string;
     onError?: (error: responseErrorStruct) => void;
