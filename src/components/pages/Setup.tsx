@@ -63,8 +63,9 @@ const UserParent = new Parent(UserDef, {
 });
 
 // Types
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type SetupProps = {
+	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: () => void,
 	setupKey: string
 }
@@ -82,8 +83,8 @@ export type SetupProps = {
 export default function Setup(props: SetupProps) {
 
 	// State
-	const [user, userSet] = useState<any>(false);
-	const [msg, msgSet] = useState<any>({
+	const [ user, userSet ] = useState<any>(false);
+	const [ msg, msgSet ] = useState<any>({
 		type: '',
 		content: 'Checking key...'
 	});
@@ -98,23 +99,31 @@ export default function Setup(props: SetupProps) {
 		// Check the key / fetch the data from the server
 		brain.read('user/setup', {
 			key: props.setupKey
-		}).then((data: boolean) => {
-			if(data) {
-				userSet(data);
-				msgSet(false);
+		}).then((res: responseStruct) => {
+		
+			if(res.error) {
+				if(res.error.code === errors.body.DB_NO_RECORD) {
+					msgSet({
+						type: 'error',
+						content: 'Key is invalid or is associated with a user that is invalid.'
+					});
+				} else {
+					if(props.onError) {
+						props.onError(res.error);
+					} else {
+						throw new Error(JSON.stringify(res.error))
+					}
+				}
+				return;
 			}
-		}, (error: responseErrorStruct) => {
-			if(error.code === errors.body.DB_NO_RECORD) {
-				msgSet({
-					type: 'error',
-					content: 'Key is invalid or is associated with a user that is invalid.'
-				});
-			} else {
-				return false;
+		
+			if(res.data) {
+				userSet(res.data);
+				msgSet(false);
 			}
 		});
 
-	}, [props.setupKey]);
+	}, [ props.setupKey ]);
 
 	// Called to submit the new data and password
 	function submit() {
@@ -151,13 +160,39 @@ export default function Setup(props: SetupProps) {
 		}, refUpdate.current.value);
 
 		// Send the data to the server
-		brain.update('user/setup', oSetup).then((data: string) => {
+		brain.update('user/setup', oSetup).then((res: responseStruct) => {
+
+			if(res.error) {
+				if(res.error.code === errors.body.DATA_FIELDS) {
+					const oTree = errorTree(res.error.msg);
+					refPasswd.current?.error(oTree);
+					refUpdate.current?.error(oTree);
+				}
+				else if(res.error.code === errors.body.DB_NO_RECORD) {
+					msgSet({
+						type: 'error',
+						content: 'Key is invalid or is associated with a user that is invalid.'
+					});
+				}
+				else if(res.error.code === errors.PASSWORD_STRENGTH) {
+					refPasswd.current?.error([
+						['passwd', 'Not strong enough']
+					]);
+				} else {
+					if(props.onError) {
+						props.onError(res.error);
+					} else {
+						throw new Error(JSON.stringify(res.error));
+					}
+				}
+				return;
+			}
 
 			// If we got data
-			if(data) {
+			if(res.data) {
 
 				// Set the session
-				brain.session(data);
+				brain.session(res.data);
 
 				// Update the signed in user
 				update().then(() => {
@@ -165,25 +200,6 @@ export default function Setup(props: SetupProps) {
 						props.onSuccess();
 					}
 				});
-			}
-		}, (error: responseErrorStruct) => {
-			if(error.code === errors.body.DATA_FIELDS) {
-				const oTree = errorTree(error.msg);
-				refPasswd.current?.error(oTree);
-				refUpdate.current?.error(oTree);
-			}
-			else if(error.code === errors.body.DB_NO_RECORD) {
-				msgSet({
-					type: 'error',
-					content: 'Key is invalid or is associated with a user that is invalid.'
-				});
-			}
-			else if(error.code === errors.PASSWORD_STRENGTH) {
-				refPasswd.current?.error([
-					['passwd', 'Not strong enough']
-				]);
-			} else {
-				return false;
 			}
 		});
 	}
@@ -234,6 +250,7 @@ export default function Setup(props: SetupProps) {
 
 // Valid props
 Setup.propTypes = {
+	onError: PropTypes.func,
 	onSuccess: PropTypes.func,
 	setupKey: PropTypes.string.isRequired
 }

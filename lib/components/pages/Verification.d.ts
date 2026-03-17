@@ -8,8 +8,10 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
+import { responseErrorStruct } from '@ouroboros/body';
 export type VerificationProps = {
-    onSuccess: () => void;
+    onError?: (error: responseErrorStruct) => void;
+    onSuccess?: () => void;
     verificationKey: string;
 };
 /**
@@ -25,6 +27,7 @@ export type VerificationProps = {
 declare function Verification(props: VerificationProps): React.JSX.Element;
 declare namespace Verification {
     var propTypes: {
+        onError: PropTypes.Requireable<(...args: any[]) => any>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         verificationKey: PropTypes.Validator<string>;
     };

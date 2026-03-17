@@ -8,7 +8,9 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
+import { responseErrorStruct } from '@ouroboros/body';
 export type SetupProps = {
+    onError?: (error: responseErrorStruct) => void;
     onSuccess?: () => void;
     setupKey: string;
 };
@@ -25,6 +27,7 @@ export type SetupProps = {
 declare function Setup(props: SetupProps): React.JSX.Element;
 declare namespace Setup {
     var propTypes: {
+        onError: PropTypes.Requireable<(...args: any[]) => any>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
         setupKey: PropTypes.Validator<string>;
     };

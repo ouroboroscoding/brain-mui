@@ -8,6 +8,7 @@
  */
 
 // Ouroboros modules
+import { responseStruct } from '@ouroboros/body';
 import brain, { errors } from '@ouroboros/brain';
 
 // NPM modules
@@ -22,7 +23,8 @@ import Typography from '@mui/material/Typography';
 // Types
 import { responseErrorStruct } from '@ouroboros/body';
 export type VerificationProps = {
-	onSuccess: () => void,
+	onError?: (error: responseErrorStruct) => void,
+	onSuccess?: () => void,
 	verificationKey: string
 }
 
@@ -39,7 +41,7 @@ export type VerificationProps = {
 export default function Verification(props: VerificationProps) {
 
 	// State
-	const [msg, msgSet] = useState({
+	const [ msg, msgSet ] = useState({
 		type: '',
 		content: 'Checking key...'
 	});
@@ -50,8 +52,26 @@ export default function Verification(props: VerificationProps) {
 		// Send the key to the server to verify
 		brain.update('user/email/verify', {
 			key: props.verificationKey
-		}).then((data: boolean) => {
-			if(data) {
+		}).then((res: responseStruct) => {
+			
+			// If there was an error
+			if(res.error) {
+				if(res.error.code === errors.body.DB_NO_RECORD) {
+					msgSet({
+						type: 'error',
+						content: 'Can not verify, key is invalid. Please make sure you copied the URL correctly. Contact support if you continue to have issues.'
+					});
+				} else {
+					if(props.onError) {
+						props.onError(res.error);
+					} else {
+						throw new Error(JSON.stringify(res.error));
+					}
+				}
+				return;
+			}
+			
+			if(res.data) {
 				msgSet({
 					type: 'success',
 					content: 'Successfully verified your e-mail address. You will be redirected to the homepage shortly.'
@@ -60,15 +80,6 @@ export default function Verification(props: VerificationProps) {
 				if(props.onSuccess) {
 					props.onSuccess();
 				}
-			}
-		}, (error: responseErrorStruct) => {
-			if(error.code === errors.body.DB_NO_RECORD) {
-				msgSet({
-					type: 'error',
-					content: 'Can not verify, key is invalid. Please make sure you copied the URL correctly. Contact support if you continue to have issues.'
-				});
-			} else {
-				return false;
 			}
 		});
 
@@ -86,6 +97,7 @@ export default function Verification(props: VerificationProps) {
 
 // Valid props
 Verification.propTypes = {
+	onError: PropTypes.func,
 	onSuccess: PropTypes.func,
 	verificationKey: PropTypes.string.isRequired
 }

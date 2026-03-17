@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 // Types
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type UserSearchProps = {
 	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: (records: any[]) => void
@@ -44,24 +44,31 @@ export default function UserSearch(props: UserSearchProps) {
 		return new Promise((resolve, reject) => {
 
 			// Fetch the records from the server
-			brain.read('search', { filter }).then((data: any[]) => {
+			brain.read('search', { filter }).then((res: responseStruct) => {
 
-				// Set the new records
-				if(props.onSuccess) {
-					props.onSuccess(data);
+				if(res.error) {
+					if(res.error.code === errors.body.DATA_FIELDS) {
+						return reject(res.error.msg);
+					} else {
+						if(props.onError) {
+							props.onError(res.error);
+							return reject([ ]);
+						} else {
+							throw new Error(JSON.stringify(res.error));
+						}
+					}
+				}
+
+				if(res.data) {
+
+					// Set the new records
+					if(props.onSuccess) {
+						props.onSuccess(res.data);
+					}
 				}
 
 				// Resolve
 				resolve(true);
-
-			}, (error: responseErrorStruct) => {
-				if(error.code === errors.body.DATA_FIELDS) {
-					reject(error.msg);
-				} else {
-					if(props.onError) {
-						props.onError(error);
-					}
-				}
 			});
 		});
 	}

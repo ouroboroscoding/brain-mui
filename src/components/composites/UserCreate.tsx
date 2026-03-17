@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 // Types
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type UserCreateProps = {
 	onError?: (error: responseErrorStruct) => void,
 	onCancel?: () => void,
@@ -49,13 +49,28 @@ export default function UserCreate(props: UserCreateProps) {
 		return new Promise((resolve, reject) => {
 
 			// Make the request to the server
-			brain.create('user', user).then((data: string) => {
+			brain.create('user', user).then((res: responseStruct) => {
+
+				if(res.error) {
+					if(res.error.code === errors.body.DATA_FIELDS) {
+						return reject(res.error.msg);
+					} else if(res.error.code === errors.body.DB_DUPLICATE) {
+						return reject({email: 'Already in use'});
+					} else {
+						if(props.onError) {
+							props.onError(res.error);
+							return reject([ ]);
+						} else {
+							throw new Error(JSON.stringify(res.error));
+						}
+					}
+				}
 
 				// If we were successful
-				if(data) {
+				if(res.data) {
 
 					// Add the ID to the user
-					user._id = data;
+					user._id = res.data;
 
 					// If we have an onSuccess prop
 					if(props.onSuccess) {
@@ -65,19 +80,6 @@ export default function UserCreate(props: UserCreateProps) {
 
 				// Resolve
 				resolve(true);
-
-			}, (error: responseErrorStruct) => {
-				if(error.code === errors.body.DATA_FIELDS) {
-					reject(error.msg);
-				} else if(error.code === errors.body.DB_DUPLICATE) {
-					reject({email: 'Already in use'});
-				} else {
-					if(props.onError) {
-						props.onError(error);
-					} else {
-						throw new Error(JSON.stringify(error));
-					}
-				}
 			});
 		});
 	}

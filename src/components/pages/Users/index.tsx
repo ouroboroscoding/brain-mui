@@ -39,7 +39,7 @@ import Permissions from './Permissions';
 // Types
 import { actionStruct } from '@ouroboros/define-mui/src/Results/Row';
 import { PortalsStruct } from './Permissions';
-import { responseErrorStruct } from '@ouroboros/body';
+import { responseErrorStruct, responseStruct } from '@ouroboros/body';
 export type UsersProps = {
 	onError?: (error: responseErrorStruct) => void,
 	onSuccess?: (type: string, data?: any) => void,
@@ -126,8 +126,8 @@ export default function Users({
 		brain.update('user/passwd', {
 			_id: password, // user ID is stored in password state
 			new_passwd: refPasswd.current.value
-		}).then((data: boolean) => {
-			if(data) {
+		}).then((res: responseStruct) => {
+			if(res.data) {
 				if(onSuccess) {
 					onSuccess('password');
 				}
@@ -146,10 +146,24 @@ export default function Users({
 		return new Promise((resolve, reject) => {
 
 			// Send the request to the server
-			brain.update('user', user).then((data: boolean) => {
+			brain.update('user', user).then((res: responseStruct) => {
+
+				// If we got failure
+				if(res.error) {
+					if(res.error.code === errors.body.DATA_FIELDS) {
+						return reject(res.error.msg);
+					} else {
+						if(onError) {
+							onError(res.error);
+							return reject([ ]);
+						} else {
+							throw new Error(JSON.stringify(res.error));
+						}
+					}
+				}
 
 				// If we got success
-				if(data) {
+				if(res.data) {
 
 					// If we have an onSuccess prop
 					if(onSuccess) {
@@ -162,18 +176,8 @@ export default function Users({
 				}
 
 				// Resolve
-				resolve(data);
+				resolve(res.data);
 
-			}, (error: responseErrorStruct) => {
-				if(error.code === errors.body.DATA_FIELDS) {
-					reject(error.msg);
-				} else {
-					if(onError) {
-						onError(error);
-					} else {
-						throw new Error(JSON.stringify(error));
-					}
-				}
 			});
 		});
 	}
@@ -190,22 +194,25 @@ export default function Users({
 				brain.create('user/setup/send', {
 					_id: user._id,
 					url: SETUP_URL
-				}).then(data => {
-					if(data) {
+				}).then((res: responseStruct) => {
+					if(res.error) {
+						if(res.error.code === errors.body.ALREADY_DONE) {
+							if(onSuccess) {
+								onSuccess('setup_done');
+							}
+						} else {
+							if(onError) {
+								onError(res.error);
+							} else {
+								throw new Error(JSON.stringify(res.error));
+							}
+						}
+						return;
+					}
+
+					if(res.data) {
 						if(onSuccess) {
 							onSuccess('setup_sent');
-						}
-					}
-				}, (error: responseErrorStruct) => {
-					if(error.code === errors.body.ALREADY_DONE) {
-						if(onSuccess) {
-							onSuccess('setup_done');
-						}
-					} else {
-						if(onError) {
-							onError(error);
-						} else {
-							throw new Error(JSON.stringify(error));
 						}
 					}
 				});
