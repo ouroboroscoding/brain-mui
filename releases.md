@@ -1,6 +1,6 @@
 # @ouroboros/brain-mui releases
 
-## 2.3.?
+## 2.3.5
 - Updated `@ouroboros/body`, `@ouroboros/brain`, and `@ouroboros/brain-react` and changed code to reflect the changes without altering how this library works.
 
 ## 2.3.4
