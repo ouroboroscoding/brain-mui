@@ -8,8 +8,10 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
+import { responseErrorStruct } from '@ouroboros/body';
 export type ForgotProps = {
     forgotKey: string;
+    onError?: (error: responseErrorStruct) => void;
     onSuccess?: () => void;
 };
 /**
@@ -26,6 +28,7 @@ declare function Forgot(props: ForgotProps): React.JSX.Element;
 declare namespace Forgot {
     var propTypes: {
         forgotKey: PropTypes.Validator<string>;
+        onError: PropTypes.Requireable<(...args: any[]) => any>;
         onSuccess: PropTypes.Requireable<(...args: any[]) => any>;
     };
 }

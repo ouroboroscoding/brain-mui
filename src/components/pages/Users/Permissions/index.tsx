@@ -30,6 +30,7 @@ import Tabs from '@mui/material/Tabs';
 import Permission from './Permission';
 
 // Types
+import { responseStruct } from '@ouroboros/body';
 export type PermissionsProps = {
 	ids?: Record<string, string>,
 	onClose: () => void,
@@ -86,8 +87,8 @@ export default function Permissions(
 	useEffect(() => {
 		brain.read('permissions', {
 			user: value._id
-		}).then(data => {
-			permissionsSet(data);
+		}).then((res: responseStruct) => {
+			permissionsSet(res.data);
 			if(!empty(permissions)) {
 				tabSet(Object.keys(permissions)[0]);
 			}
@@ -191,8 +192,8 @@ export default function Permissions(
 			user: value._id,
 			portal: tab,
 			rights: permissions[tab as string]
-		}).then((data: boolean) => {
-			if(data) {
+		}).then((res: responseStruct) => {
+			if(res.data) {
 				if(onUpdate) {
 					onUpdate();
 				}
