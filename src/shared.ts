@@ -19,13 +19,15 @@ export const UserTree = new Tree(UserDef, {
 	__ui__: {
 		__create__: [
 			'email', 'title', 'first_name', 'last_name', 'suffix',
-			'phone_number', 'phone_ext'
+			'phone_number', 'phone_ext', 'referral'
 		],
 		__results__: [
-			'_id', 'email', 'title', 'first_name', 'last_name', 'suffix'
+			'_id', 'email', 'title', 'first_name', 'last_name', 'suffix',
+			'referral'
 		],
 		__search__: [
-			'_id', 'email', 'first_name', 'last_name', 'phone_number'
+			'_id', 'email', 'first_name', 'last_name', 'phone_number',
+			'referral'
 		],
 		__update__: [
 			'title', 'first_name', 'last_name', 'suffix', 'phone_number',
@@ -62,6 +64,7 @@ export const GRID_SIZES: Record<string, any> = {
 	first_name: { xs: 12, sm: 9, lg: 4 },
 	last_name: { xs: 12, sm: 9, lg: 4 },
 	suffix: { xs: 12, sm: 3, lg: 2 },
-	phone_number: { xs: 12, sm: 8 },
-	phone_ext: { xs: 12, sm: 4 }
+	phone_number: { xs: 12, sm: 8, xl: 4 },
+	phone_ext: { xs: 12, sm: 4, xl: 2 },
+	referral: { xs: 12, xl: 6 }
 };
